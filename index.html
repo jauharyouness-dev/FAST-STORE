@@ -29,6 +29,7 @@ input:focus,textarea:focus,select:focus { outline:none; }
 @keyframes shake    { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 @keyframes bgPulse  { 0%{transform:scale(1)} 50%{transform:scale(1.1)} 100%{transform:scale(1)} }
 @keyframes notifPop { 0%{transform:scale(0)} 50%{transform:scale(1.2)} 100%{transform:scale(1)} }
+@keyframes typing   { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
 </style>
 </head>
 <body>
@@ -50,6 +51,7 @@ const TG_TOKEN = "8390349160:AAGlePL2KGPU4nmtR7XackUOsyQY50XqAC0";
 const TG_CHAT_ID = "8038053852";
 const ADMIN_EMAIL = "younesd.55yyy5@gmail.com";
 
+// إرسال فقط لإشعارات الأدمن (ليس الطلبات)
 async function sendTelegram(message) {
   try {
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -59,87 +61,84 @@ async function sendTelegram(message) {
     });
   } catch(e) {}
 }
+
+// دالة AI للدعم
+async function askAI(messages) {
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `أنت مساعد دعم فني لمتجر رقمي اسمه "FAST STORE ⚡". المتجر يبيع خدمات Instagram و TikTok فقط.
+خدمات Instagram: متابعين (500 بـ5 DH، 1000 بـ10 DH، 2000 بـ20 DH)، تعليقات (50 بـ5 DH، 100 بـ10 DH، 200 بـ15 DH)، مشاهدات ستوري (50 بـ5 DH، 100 بـ10 DH، 200 بـ15 DH).
+خدمات TikTok: حسابات (1K بـ10 DH، 10K بـ50 DH، 30K بـ100 DH) — شراء الحسابات فقط عبر أدمن القروب.
+الشحن عبر Orange Money. أجب باللغة العربية بشكل ودي وموجز.`,
+        messages: messages
+      })
+    });
+    const data = await res.json();
+    return data.content?.[0]?.text || "عذراً، حدث خطأ. حاول مجدداً.";
+  } catch(e) {
+    return "عذراً، خدمة الذكاء الاصطناعي غير متاحة حالياً. تواصل معنا عبر WhatsApp.";
+  }
+}
 </script>
 <script type="text/babel">
 const { useState, useEffect, useRef } = React;
-
-const ORANGE = "#FF6B00", ORANGE2 = "#FF9500", BLUE_FB = "#1877F2";
-const BLUE_G = "#4285F4", BG = "#0A0A0F", CARD = "#12121A", CARD2 = "#1A1A2E";
-const GREEN = "#22C55E", RED = "#EF4444";
+const ORANGE="#FF6B00", ORANGE2="#FF9500", BLUE_FB="#1877F2";
+const BG="#0A0A0F", CARD="#12121A", CARD2="#1A1A2E";
+const GREEN="#22C55E", RED="#EF4444";
+const WA_LINK = "https://chat.whatsapp.com/Eh43LkrbSpF7pWs6pPEfAn";
+const IG_USER = "Fast.____.store";
 
 const PLANS = [
-  { dh:5, balance:500, popular:false },
-  { dh:10, balance:1000, popular:true },
-  { dh:20, balance:2000, popular:false },
-  { dh:50, balance:5000, popular:false },
+  { dh:5, popular:false },
+  { dh:10, popular:true },
+  { dh:20, popular:false },
+  { dh:50, popular:false },
 ];
 
-// ✅ الخدمات المحدّثة
 const services = [
-  { id:1, category:"Free Fire 💎", icon:"🔥", items:[
-    { id:11, name:"100 Diamond – Free Fire", price:15, desc:"100 جوهرة مباشرة لحسابك", rating:4.9, sold:312 },
-    { id:12, name:"200 Diamond – Free Fire", price:30, desc:"200 جوهرة بسعر ممتاز", rating:4.9, sold:198 },
-    { id:13, name:"300 Diamond – Free Fire", price:35, desc:"300 جوهرة بأقل سعر", rating:5.0, sold:421 },
+  { id:3, category:"Instagram", icon:"📸", items:[
+    { id:31, name:"📈 500 متابع", price:5, desc:"500 متابع حقيقي وآمن", rating:4.7, sold:445 },
+    { id:32, name:"📈 1000 متابع", price:10, desc:"1000 متابع حقيقي وآمن", rating:4.8, sold:523 },
+    { id:33, name:"📈 2000 متابع", price:20, desc:"2000 متابع بسعر ممتاز", rating:4.9, sold:312 },
+    { id:34, name:"💬 50 تعليق", price:5, desc:"50 تعليق عربي طبيعي", rating:4.6, sold:234 },
+    { id:35, name:"💬 100 تعليق", price:10, desc:"100 تعليق عربي طبيعي", rating:4.7, sold:189 },
+    { id:36, name:"💬 200 تعليق", price:15, desc:"200 تعليق عربي طبيعي", rating:4.8, sold:145 },
+    { id:37, name:"👀 50 مشاهدة ستوري", price:5, desc:"50 مشاهدة فورية للستوري", rating:4.9, sold:612 },
+    { id:38, name:"👀 100 مشاهدة ستوري", price:10, desc:"100 مشاهدة فورية للستوري", rating:4.9, sold:534 },
+    { id:39, name:"👀 200 مشاهدة ستوري", price:15, desc:"200 مشاهدة فورية للستوري", rating:5.0, sold:421 },
   ]},
-  { id:2, category:"Instagram 📸", icon:"📸", items:[
-    { id:21, name:"500 متابع – Instagram", price:5, desc:"500 متابع حقيقي وآمن", rating:4.8, sold:534 },
-    { id:22, name:"1000 متابع – Instagram", price:10, desc:"1000 متابع بجودة عالية", rating:4.9, sold:389 },
-    { id:23, name:"2000 متابع – Instagram", price:20, desc:"2000 متابع بأفضل سعر", rating:4.8, sold:210 },
-    { id:24, name:"50 تعليق – Instagram", price:5, desc:"50 تعليق عربي طبيعي", rating:4.7, sold:287 },
-    { id:25, name:"100 تعليق – Instagram", price:10, desc:"100 تعليق تفاعلي", rating:4.8, sold:176 },
-    { id:26, name:"200 تعليق – Instagram", price:15, desc:"200 تعليق متنوع", rating:4.7, sold:134 },
-    { id:27, name:"50 مشاهدة ستوري", price:5, desc:"50 مشاهدة فورية للستوري", rating:4.9, sold:645 },
-    { id:28, name:"100 مشاهدة ستوري", price:10, desc:"100 مشاهدة لأي ستوري", rating:5.0, sold:512 },
-    { id:29, name:"200 مشاهدة ستوري", price:15, desc:"200 مشاهدة بسعر خاص", rating:4.9, sold:398 },
-  ]},
-  { id:3, category:"TikTok 🎵", icon:"🎵", items:[
-    { id:31, name:"حساب TikTok – 1K متابع", price:10, desc:"حساب تيك توك بـ 1000 متابع", rating:4.7, sold:145 },
-    { id:32, name:"حساب TikTok – 10K متابع", price:50, desc:"حساب تيك توك بـ 10K متابع", rating:4.8, sold:87 },
-    { id:33, name:"حساب TikTok – 30K متابع", price:100, desc:"حساب تيك توك بـ 30K متابع", rating:4.9, sold:43 },
+  { id:4, category:"TikTok", icon:"🎵", items:[
+    { id:41, name:"🎵 حساب TikTok 1K", price:10, desc:"حساب تيك توك 1,000 متابع", rating:4.7, sold:98 },
+    { id:42, name:"🎵 حساب TikTok 10K", price:50, desc:"حساب تيك توك 10,000 متابع", rating:4.8, sold:67 },
+    { id:43, name:"🎵 حساب TikTok 30K", price:100, desc:"حساب تيك توك 30,000 متابع", rating:4.9, sold:34 },
   ]},
 ];
 
-// ==================== COUNTER ====================
 function Counter({ value }) {
   const [d, setD] = useState(0);
   useEffect(() => {
-    let c = 0;
-    const step = Math.max(1, Math.ceil(value / 50));
-    const t = setInterval(() => {
-      c += step;
-      if (c >= value) { setD(value); clearInterval(t); }
-      else setD(c);
-    }, 25);
-    return () => clearInterval(t);
-  }, [value]);
+    let c=0; const step=Math.max(1,Math.ceil(value/50));
+    const t=setInterval(()=>{ c+=step; if(c>=value){setD(value);clearInterval(t);}else setD(c); },25);
+    return()=>clearInterval(t);
+  },[value]);
   return d.toLocaleString('ar');
 }
 
-// ==================== STARS ====================
 function Stars({ rating }) {
-  return (
-    <span style={{color:"#FFB800",fontSize:11}}>
-      {"★".repeat(Math.floor(rating))}{"☆".repeat(5-Math.floor(rating))}
-      <span style={{color:"#ffffff50",marginRight:4}}>{rating}</span>
-    </span>
-  );
+  return <span style={{color:"#FFB800",fontSize:11}}>{"★".repeat(Math.floor(rating))}{"☆".repeat(5-Math.floor(rating))}<span style={{color:"#ffffff50",marginRight:4}}>{rating}</span></span>;
 }
 
-// ==================== SPLASH ====================
 function Splash({ onDone }) {
   const [prog, setProg] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setProg(p => {
-      if (p >= 100) { clearInterval(t); setTimeout(onDone, 300); return 100; }
-      return p + 2;
-    }), 30);
-    return () => clearInterval(t);
-  }, []);
+  useEffect(()=>{ const t=setInterval(()=>setProg(p=>{ if(p>=100){clearInterval(t);setTimeout(onDone,300);return 100;} return p+2; }),30); return()=>clearInterval(t); },[]);
   return (
     <div style={{position:"fixed",inset:0,background:BG,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",zIndex:9999}}>
-      {[...Array(4)].map((_,i)=>(
-        <div key={i} style={{position:"absolute",width:130+i*100,height:130+i*100,borderRadius:"50%",border:`1px solid ${i%2===0?ORANGE:ORANGE2}12`,top:"50%",left:"50%",transform:"translate(-50%,-50%)",animation:`pulse ${2+i*0.4}s ease-in-out infinite`}}/>
-      ))}
+      {[...Array(4)].map((_,i)=><div key={i} style={{position:"absolute",width:130+i*100,height:130+i*100,borderRadius:"50%",border:`1px solid ${i%2===0?ORANGE:ORANGE2}12`,top:"50%",left:"50%",transform:"translate(-50%,-50%)",animation:`pulse ${2+i*0.4}s ease-in-out infinite`}}/>)}
       <div style={{width:110,height:110,borderRadius:"50%",background:`conic-gradient(${ORANGE},${ORANGE2},${ORANGE})`,display:"flex",alignItems:"center",justifyContent:"center",animation:"spin 3s linear infinite",boxShadow:`0 0 50px ${ORANGE}60`,marginBottom:32}}>
         <div style={{width:90,height:90,borderRadius:"50%",background:BG,display:"flex",alignItems:"center",justifyContent:"center",fontSize:42}}>⚡</div>
       </div>
@@ -158,135 +157,64 @@ function Splash({ onDone }) {
   );
 }
 
-// ==================== LOGIN ====================
 function LoginScreen({ onLogin, showToast }) {
-  const [mode, setMode] = useState("login");
-  const [email, setEmail] = useState("");
-  const [pass, setPass] = useState("");
-  const [name, setName] = useState("");
-  const [loading, setLoad] = useState(false);
-  const [showP, setShowP] = useState(false);
-  const [err, setErr] = useState("");
-  const [shake, setShake] = useState(false);
+  const [mode,setMode]=useState("login"); const [email,setEmail]=useState(""); const [pass,setPass]=useState(""); const [name,setName]=useState("");
+  const [loading,setLoad]=useState(false); const [showP,setShowP]=useState(false); const [err,setErr]=useState(""); const [shake,setShake]=useState(false);
+  const doShake=()=>{setShake(true);setTimeout(()=>setShake(false),500);};
+  const errMsgs={"auth/email-already-in-use":"البريد مستخدم من قبل","auth/wrong-password":"كلمة المرور غير صحيحة","auth/user-not-found":"البريد غير موجود","auth/weak-password":"كلمة المرور ضعيفة (6 أحرف على الأقل)","auth/invalid-email":"صيغة البريد غير صحيحة","auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة","auth/too-many-requests":"محاولات كثيرة، انتظر قليلاً","auth/network-request-failed":"تحقق من اتصالك","auth/popup-closed-by-user":"تم إغلاق النافذة"};
+  const saveUser=async(uid,data)=>{try{await db.collection("users").doc(uid).set(data,{merge:true});}catch(e){}};
 
-  const doShake = () => { setShake(true); setTimeout(()=>setShake(false),500); };
-
-  const errMsgs = {
-    "auth/email-already-in-use": "البريد الإلكتروني مستخدم من قبل",
-    "auth/wrong-password": "كلمة المرور غير صحيحة",
-    "auth/user-not-found": "البريد الإلكتروني غير موجود",
-    "auth/weak-password": "كلمة المرور ضعيفة (6 أحرف على الأقل)",
-    "auth/invalid-email": "صيغة البريد الإلكتروني غير صحيحة",
-    "auth/invalid-credential": "البريد أو كلمة المرور غير صحيحة",
-    "auth/too-many-requests": "محاولات كثيرة، انتظر قليلاً",
-    "auth/network-request-failed": "تحقق من اتصالك بالإنترنت",
-    "auth/popup-closed-by-user": "تم إغلاق نافذة تسجيل الدخول",
-  };
-
-  const saveUserToFirestore = async (uid, userData) => {
-    try {
-      await db.collection("users").doc(uid).set(userData, { merge: true });
-    } catch(e) { console.log("Firestore:", e); }
-  };
-
-  const handleGoogle = async () => {
-    setLoad(true); setErr("");
-    try {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      const cred = await auth.signInWithPopup(provider);
-      const snap = await db.collection("users").doc(cred.user.uid).get();
-      const isNew = !snap.exists;
-      if (isNew) {
-        await saveUserToFirestore(cred.user.uid, {
-          name: cred.user.displayName || "مستخدم",
-          email: cred.user.email,
-          balance: 0,
-          points: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        await sendTelegram(`👤 *مستخدم جديد (Google)!*\n🙍 ${cred.user.displayName}\n✉️ ${cred.user.email}`);
-      }
-      const data = snap.exists ? snap.data() : { balance: 0, points: 0 };
-      onLogin({ uid: cred.user.uid, name: cred.user.displayName || "مستخدم", email: cred.user.email, balance: data.balance||0, points: data.points||0 });
-    } catch(e) {
-      setErr(errMsgs[e.code] || "فشل تسجيل الدخول بـ Google");
-      doShake();
-    }
+  const handleGoogle=async()=>{
+    setLoad(true);setErr("");
+    try{
+      const p=new firebase.auth.GoogleAuthProvider(); const cred=await auth.signInWithPopup(p);
+      const snap=await db.collection("users").doc(cred.user.uid).get();
+      if(!snap.exists){await saveUser(cred.user.uid,{name:cred.user.displayName||"مستخدم",email:cred.user.email,balance:0,points:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});await sendTelegram(`👤 *مستخدم جديد (Google)!*\n🙍 ${cred.user.displayName}\n✉️ ${cred.user.email}`);}
+      const data=snap.exists?snap.data():{balance:0,points:0};
+      onLogin({uid:cred.user.uid,name:cred.user.displayName||"مستخدم",email:cred.user.email,balance:data.balance||0,points:data.points||0});
+    }catch(e){setErr(errMsgs[e.code]||"فشل تسجيل الدخول بـ Google");doShake();}
     setLoad(false);
   };
 
-  const handleFacebook = async () => {
-    setLoad(true); setErr("");
-    try {
-      const provider = new firebase.auth.FacebookAuthProvider();
-      const cred = await auth.signInWithPopup(provider);
-      const snap = await db.collection("users").doc(cred.user.uid).get();
-      if (!snap.exists) {
-        await saveUserToFirestore(cred.user.uid, {
-          name: cred.user.displayName || "مستخدم",
-          email: cred.user.email || "",
-          balance: 0, points: 0,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      const data = snap.exists ? snap.data() : { balance: 0, points: 0 };
-      onLogin({ uid: cred.user.uid, name: cred.user.displayName || "مستخدم", email: cred.user.email || "", balance: data.balance||0, points: data.points||0 });
-    } catch(e) {
-      setErr(errMsgs[e.code] || "فشل تسجيل الدخول بـ Facebook");
-      doShake();
-    }
+  const handleFacebook=async()=>{
+    setLoad(true);setErr("");
+    try{
+      const p=new firebase.auth.FacebookAuthProvider(); const cred=await auth.signInWithPopup(p);
+      const snap=await db.collection("users").doc(cred.user.uid).get();
+      if(!snap.exists)await saveUser(cred.user.uid,{name:cred.user.displayName||"مستخدم",email:cred.user.email||"",balance:0,points:0,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      const data=snap.exists?snap.data():{balance:0,points:0};
+      onLogin({uid:cred.user.uid,name:cred.user.displayName||"مستخدم",email:cred.user.email||"",balance:data.balance||0,points:data.points||0});
+    }catch(e){setErr(errMsgs[e.code]||"فشل تسجيل الدخول بـ Facebook");doShake();}
     setLoad(false);
   };
 
-  const handleEmail = async () => {
+  const handleEmail=async()=>{
     setErr("");
-    if (mode === "register") {
-      if (!name.trim()) { setErr("يرجى إدخال الاسم الكامل"); doShake(); return; }
-      if (!email.trim()) { setErr("يرجى إدخال البريد الإلكتروني"); doShake(); return; }
-      if (!pass.trim()) { setErr("يرجى إدخال كلمة المرور"); doShake(); return; }
-      if (pass.length < 6) { setErr("كلمة المرور يجب أن تكون 6 أحرف على الأقل"); doShake(); return; }
-    } else {
-      if (!email.trim() || !pass.trim()) { setErr("يرجى ملء جميع الحقول"); doShake(); return; }
-    }
+    if(mode==="register"){if(!name.trim()){setErr("يرجى إدخال الاسم");doShake();return;}if(!email.trim()){setErr("يرجى إدخال البريد");doShake();return;}if(!pass.trim()){setErr("يرجى إدخال كلمة المرور");doShake();return;}if(pass.length<6){setErr("كلمة المرور يجب أن تكون 6 أحرف على الأقل");doShake();return;}}
+    else{if(!email.trim()||!pass.trim()){setErr("يرجى ملء جميع الحقول");doShake();return;}}
     setLoad(true);
-    try {
-      if (mode === "register") {
-        const cred = await auth.createUserWithEmailAndPassword(email.trim(), pass);
-        try { await cred.user.updateProfile({ displayName: name.trim() }); } catch(e) {}
-        await saveUserToFirestore(cred.user.uid, {
-          name: name.trim(), email: email.trim(), balance: 0, points: 100,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        try { await sendTelegram(`👤 *مستخدم جديد!*\n🙍 ${name.trim()}\n✉️ ${email.trim()}`); } catch(e) {}
-        onLogin({ uid: cred.user.uid, name: name.trim(), email: email.trim(), balance: 0, points: 100 });
-        showToast("🎁 حصلت على 100 نقطة ترحيبية!");
-      } else {
-        const cred = await auth.signInWithEmailAndPassword(email.trim(), pass);
-        let data = { name: cred.user.displayName || email.split("@")[0], balance: 0, points: 0 };
-        try {
-          const snap = await db.collection("users").doc(cred.user.uid).get();
-          if (snap.exists) data = snap.data();
-        } catch(e) {}
-        onLogin({ uid: cred.user.uid, name: data.name, email: email.trim(), balance: data.balance||0, points: data.points||0 });
+    try{
+      if(mode==="register"){
+        const cred=await auth.createUserWithEmailAndPassword(email.trim(),pass);
+        try{await cred.user.updateProfile({displayName:name.trim()});}catch(e){}
+        await saveUser(cred.user.uid,{name:name.trim(),email:email.trim(),balance:0,points:100,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+        try{await sendTelegram(`👤 *مستخدم جديد!*\n🙍 ${name.trim()}\n✉️ ${email.trim()}`);}catch(e){}
+        onLogin({uid:cred.user.uid,name:name.trim(),email:email.trim(),balance:0,points:100}); showToast("🎁 حصلت على 100 نقطة ترحيبية!");
+      }else{
+        const cred=await auth.signInWithEmailAndPassword(email.trim(),pass);
+        let data={name:cred.user.displayName||email.split("@")[0],balance:0,points:0};
+        try{const s=await db.collection("users").doc(cred.user.uid).get();if(s.exists)data=s.data();}catch(e){}
+        onLogin({uid:cred.user.uid,name:data.name,email:email.trim(),balance:data.balance||0,points:data.points||0});
       }
-    } catch(e) {
-      setErr(errMsgs[e.code] || `حدث خطأ: ${e.message}`);
-      doShake();
-    }
+    }catch(e){setErr(errMsgs[e.code]||`حدث خطأ: ${e.message}`);doShake();}
     setLoad(false);
   };
 
-  const handleForgot = async () => {
-    if (!email.trim()) { setErr("أدخل بريدك الإلكتروني أولاً"); doShake(); return; }
+  const handleForgot=async()=>{
+    if(!email.trim()){setErr("أدخل بريدك الإلكتروني أولاً");doShake();return;}
     setLoad(true);
-    try {
-      await auth.sendPasswordResetEmail(email.trim());
-      showToast("📧 تم إرسال رابط الاستعادة!");
-      setMode("login");
-    } catch(e) {
-      setErr(errMsgs[e.code] || "حدث خطأ");
-      doShake();
-    }
+    try{await auth.sendPasswordResetEmail(email.trim());showToast("📧 تم إرسال رابط الاستعادة!");setMode("login");}
+    catch(e){setErr(errMsgs[e.code]||"حدث خطأ");doShake();}
     setLoad(false);
   };
 
@@ -294,130 +222,81 @@ function LoginScreen({ onLogin, showToast }) {
     <div style={{minHeight:"100vh",background:BG,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"20px 24px",position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:-100,right:-80,width:280,height:280,borderRadius:"50%",background:`${ORANGE}08`,filter:"blur(60px)",animation:"bgPulse 8s ease-in-out infinite"}}/>
       <div style={{position:"absolute",bottom:-80,left:-60,width:220,height:220,borderRadius:"50%",background:`${ORANGE2}06`,filter:"blur(50px)",animation:"bgPulse 10s ease-in-out infinite reverse"}}/>
-
       <div style={{textAlign:"center",marginBottom:28,animation:"fadeDown 0.6s ease"}}>
         <div style={{width:80,height:80,borderRadius:24,background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:36,margin:"0 auto 14px",boxShadow:`0 0 30px ${ORANGE}50`,animation:"glow 3s ease-in-out infinite"}}>⚡</div>
         <div style={{fontSize:26,fontWeight:900,letterSpacing:4,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>FAST STORE</div>
-        <div style={{color:"#ffffff40",fontSize:13,marginTop:6}}>
-          {mode==="login"?"أهلاً بعودتك 👋":mode==="register"?"أنشئ حسابك الآن 🚀":"استعادة كلمة المرور 🔑"}
-        </div>
+        <div style={{color:"#ffffff40",fontSize:13,marginTop:6}}>{mode==="login"?"أهلاً بعودتك 👋":mode==="register"?"أنشئ حسابك الآن 🚀":"استعادة كلمة المرور 🔑"}</div>
       </div>
-
       <div style={{width:"100%",maxWidth:400,background:CARD2,borderRadius:24,padding:24,border:"1px solid #ffffff0A",boxShadow:"0 20px 60px #00000060",animation:"fadeIn 0.5s ease"}}>
-        {mode !== "forgot" && (
-          <>
-            <div style={{display:"flex",gap:10,marginBottom:16}}>
-              <button onClick={handleGoogle} style={{flex:1,background:"#ffffff",border:"none",borderRadius:14,padding:"13px",color:"#333",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 2px 10px #00000030"}}>
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Google
-              </button>
-              <button onClick={handleFacebook} style={{flex:1,background:BLUE_FB,border:"none",borderRadius:14,padding:"13px",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 2px 10px ${BLUE_FB}40`}}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                Facebook
-              </button>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
-              <div style={{flex:1,height:1,background:"#ffffff12"}}/>
-              <span style={{color:"#ffffff30",fontSize:12}}>أو بالبريد الإلكتروني</span>
-              <div style={{flex:1,height:1,background:"#ffffff12"}}/>
-            </div>
-          </>
-        )}
-
-        {err && (
-          <div style={{background:"#EF444415",border:"1px solid #EF444430",borderRadius:12,padding:"10px 14px",marginBottom:14,color:"#EF4444",fontSize:13,textAlign:"center",animation:"fadeIn 0.3s ease"}}>
-            ❌ {err}
+        {mode!=="forgot"&&(<>
+          <div style={{display:"flex",gap:10,marginBottom:16}}>
+            <button onClick={handleGoogle} style={{flex:1,background:"#ffffff",border:"none",borderRadius:14,padding:"13px",color:"#333",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:"0 2px 10px #00000030"}}>
+              <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+              Google
+            </button>
+            <button onClick={handleFacebook} style={{flex:1,background:BLUE_FB,border:"none",borderRadius:14,padding:"13px",color:"#fff",fontWeight:700,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              Facebook
+            </button>
           </div>
-        )}
-
-        {mode==="register" && (
+          <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+            <div style={{flex:1,height:1,background:"#ffffff12"}}/><span style={{color:"#ffffff30",fontSize:12}}>أو بالبريد الإلكتروني</span><div style={{flex:1,height:1,background:"#ffffff12"}}/>
+          </div>
+        </>)}
+        {err&&<div style={{background:"#EF444415",border:"1px solid #EF444430",borderRadius:12,padding:"10px 14px",marginBottom:14,color:"#EF4444",fontSize:13,textAlign:"center",animation:"fadeIn 0.3s ease"}}>❌ {err}</div>}
+        {mode==="register"&&(
           <div style={{marginBottom:12}}>
             <div style={{color:"#ffffff60",fontSize:12,marginBottom:6}}>الاسم الكامل</div>
-            <div style={{position:"relative"}}>
-              <span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>👤</span>
-              <input value={name} onChange={e=>setName(e.target.value)} placeholder="أدخل اسمك الكامل"
-                style={{width:"100%",background:"#ffffff08",border:`1px solid ${name?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px 13px 14px",color:"#fff",fontSize:14,boxSizing:"border-box"}}/>
+            <div style={{position:"relative"}}><span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>👤</span>
+              <input value={name} onChange={e=>setName(e.target.value)} placeholder="أدخل اسمك الكامل" style={{width:"100%",background:"#ffffff08",border:`1px solid ${name?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px 13px 14px",color:"#fff",fontSize:14,boxSizing:"border-box"}}/>
             </div>
           </div>
         )}
-
         <div style={{marginBottom:12}}>
           <div style={{color:"#ffffff60",fontSize:12,marginBottom:6}}>البريد الإلكتروني</div>
-          <div style={{position:"relative"}}>
-            <span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>✉️</span>
-            <input value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} placeholder="example@email.com" type="email"
-              style={{width:"100%",background:"#ffffff08",border:`1px solid ${email?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px 13px 14px",color:"#fff",fontSize:14,boxSizing:"border-box",animation:shake?"shake 0.4s ease":"none"}}/>
+          <div style={{position:"relative"}}><span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>✉️</span>
+            <input value={email} onChange={e=>{setEmail(e.target.value);setErr("");}} placeholder="example@email.com" type="email" style={{width:"100%",background:"#ffffff08",border:`1px solid ${email?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px 13px 14px",color:"#fff",fontSize:14,boxSizing:"border-box",animation:shake?"shake 0.4s ease":"none"}}/>
           </div>
         </div>
-
-        {mode !== "forgot" && (
+        {mode!=="forgot"&&(
           <div style={{marginBottom:16}}>
             <div style={{color:"#ffffff60",fontSize:12,marginBottom:6}}>كلمة المرور</div>
-            <div style={{position:"relative"}}>
-              <span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>🔒</span>
-              <input value={pass} onChange={e=>{setPass(e.target.value);setErr("");}} placeholder="••••••••" type={showP?"text":"password"}
-                style={{width:"100%",background:"#ffffff08",border:`1px solid ${pass?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px",color:"#fff",fontSize:14,boxSizing:"border-box"}}/>
+            <div style={{position:"relative"}}><span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:18}}>🔒</span>
+              <input value={pass} onChange={e=>{setPass(e.target.value);setErr("");}} placeholder="••••••••" type={showP?"text":"password"} style={{width:"100%",background:"#ffffff08",border:`1px solid ${pass?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 44px",color:"#fff",fontSize:14,boxSizing:"border-box"}}/>
               <span onClick={()=>setShowP(!showP)} style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",fontSize:16,cursor:"pointer",opacity:0.5}}>{showP?"🙈":"👁️"}</span>
             </div>
-            {mode==="register" && pass.length > 0 && (
+            {mode==="register"&&pass.length>0&&(
               <div style={{marginTop:8}}>
-                <div style={{display:"flex",gap:4}}>
-                  {[1,2,3,4].map(i=>(
-                    <div key={i} style={{flex:1,height:3,borderRadius:2,background:pass.length>=i*2?(pass.length>=8?GREEN:pass.length>=6?ORANGE:RED):"#ffffff15",transition:"background 0.3s"}}/>
-                  ))}
-                </div>
-                <div style={{color:pass.length>=8?GREEN:pass.length>=6?ORANGE:RED,fontSize:11,marginTop:4}}>
-                  {pass.length>=8?"قوية ✅":pass.length>=6?"مقبولة ⚠️":"ضعيفة ❌"} ({pass.length} أحرف)
-                </div>
+                <div style={{display:"flex",gap:4}}>{[1,2,3,4].map(i=><div key={i} style={{flex:1,height:3,borderRadius:2,background:pass.length>=i*2?(pass.length>=8?GREEN:pass.length>=6?ORANGE:RED):"#ffffff15",transition:"background 0.3s"}}/>)}</div>
+                <div style={{color:pass.length>=8?GREEN:pass.length>=6?ORANGE:RED,fontSize:11,marginTop:4}}>{pass.length>=8?"قوية ✅":pass.length>=6?"مقبولة ⚠️":"ضعيفة ❌"} ({pass.length} أحرف)</div>
               </div>
             )}
-            {mode==="login" && (
-              <div onClick={()=>{setMode("forgot");setErr("");}} style={{color:ORANGE,fontSize:12,marginTop:8,cursor:"pointer",textAlign:"left"}}>نسيت كلمة المرور؟</div>
-            )}
+            {mode==="login"&&<div onClick={()=>{setMode("forgot");setErr("");}} style={{color:ORANGE,fontSize:12,marginTop:8,cursor:"pointer",textAlign:"left"}}>نسيت كلمة المرور؟</div>}
           </div>
         )}
-
-        {mode==="forgot" && (
-          <div style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}25`,borderRadius:12,padding:14,marginBottom:18}}>
-            <div style={{color:ORANGE,fontSize:13}}>📧 سيتم إرسال رابط الاستعادة على بريدك</div>
-          </div>
-        )}
-
+        {mode==="forgot"&&<div style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}25`,borderRadius:12,padding:14,marginBottom:18}}><div style={{color:ORANGE,fontSize:13}}>📧 سيتم إرسال رابط الاستعادة على بريدك</div></div>}
         <button onClick={mode==="forgot"?handleForgot:handleEmail} disabled={loading}
-          style={{width:"100%",background:loading?"#ffffff20":`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"15px",color:"#fff",fontWeight:800,fontSize:16,cursor:loading?"not-allowed":"pointer",boxShadow:loading?"none":`0 6px 20px ${ORANGE}40`,transition:"all 0.3s"}}>
-          {loading ? (
-            <span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-              <span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري...
-            </span>
-          ) : mode==="login"?"🚀 تسجيل الدخول":mode==="register"?"✅ إنشاء الحساب":"📨 إرسال الرابط"}
+          style={{width:"100%",background:loading?"#ffffff20":`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"15px",color:"#fff",fontWeight:800,fontSize:16,cursor:loading?"not-allowed":"pointer",transition:"all 0.3s"}}>
+          {loading?<span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري...</span>:mode==="login"?"🚀 تسجيل الدخول":mode==="register"?"✅ إنشاء الحساب":"📨 إرسال الرابط"}
         </button>
-
         <div style={{textAlign:"center",marginTop:16}}>
-          {mode==="login" && <span style={{color:"#ffffff50",fontSize:13}}>ليس لديك حساب؟ <span onClick={()=>{setMode("register");setErr("");setEmail("");setPass("");setName("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer"}}>أنشئ حساباً</span></span>}
-          {mode==="register" && <span style={{color:"#ffffff50",fontSize:13}}>لديك حساب؟ <span onClick={()=>{setMode("login");setErr("");setEmail("");setPass("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer"}}>سجّل الدخول</span></span>}
-          {mode==="forgot" && <span onClick={()=>{setMode("login");setErr("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer",fontSize:13}}>→ رجوع لتسجيل الدخول</span>}
+          {mode==="login"&&<span style={{color:"#ffffff50",fontSize:13}}>ليس لديك حساب؟ <span onClick={()=>{setMode("register");setErr("");setEmail("");setPass("");setName("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer"}}>أنشئ حساباً</span></span>}
+          {mode==="register"&&<span style={{color:"#ffffff50",fontSize:13}}>لديك حساب؟ <span onClick={()=>{setMode("login");setErr("");setEmail("");setPass("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer"}}>سجّل الدخول</span></span>}
+          {mode==="forgot"&&<span onClick={()=>{setMode("login");setErr("");}} style={{color:ORANGE,fontWeight:700,cursor:"pointer",fontSize:13}}>→ رجوع لتسجيل الدخول</span>}
         </div>
       </div>
     </div>
   );
 }
 
-// ==================== HOME TAB ====================
 function HomeTab({ user, balance, points, onBuy, setTab }) {
-  const featured = [services[0].items[0], services[1].items[0], services[2].items[1]];
-  const [timeLeft, setTimeLeft] = useState(82800);
-  const [coupon, setCoupon] = useState("");
-  const [couponMsg, setCouponMsg] = useState("");
-
-  useEffect(() => { const t = setInterval(()=>setTimeLeft(s=>s>0?s-1:0),1000); return()=>clearInterval(t); },[]);
-  const fmt = s=>`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-
-  const COUPONS = { "FAST10": 10, "WELCOME": 20, "VIP50": 50 };
-  const checkCoupon = () => {
-    const disc = COUPONS[coupon.toUpperCase()];
-    if (disc) setCouponMsg(`✅ كوبون صالح! خصم ${disc} DH`);
-    else setCouponMsg("❌ كوبون غير صالح");
-  };
+  const featured = [services[0].items[0], services[0].items[3], services[1].items[0], services[1].items[1]];
+  const [timeLeft,setTimeLeft]=useState(82800);
+  const [coupon,setCoupon]=useState(""); const [couponMsg,setCouponMsg]=useState("");
+  useEffect(()=>{const t=setInterval(()=>setTimeLeft(s=>s>0?s-1:0),1000);return()=>clearInterval(t);},[]);
+  const fmt=s=>`${String(Math.floor(s/3600)).padStart(2,"0")}:${String(Math.floor((s%3600)/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const COUPONS={"FAST10":10,"WELCOME":20,"VIP50":50};
+  const checkCoupon=()=>{const d=COUPONS[coupon.toUpperCase()];if(d)setCouponMsg(`✅ كوبون صالح! خصم ${d} DH`);else setCouponMsg("❌ كوبون غير صالح");};
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
@@ -428,9 +307,7 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end"}}>
           <div>
             <div style={{color:"#ffffff50",fontSize:12,marginBottom:4}}>💳 رصيدك</div>
-            <div style={{fontSize:34,fontWeight:900,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
-              <Counter value={balance}/> <span style={{fontSize:16,WebkitTextFillColor:"#ffffff50"}}>DH</span>
-            </div>
+            <div style={{fontSize:34,fontWeight:900,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}><Counter value={balance}/> <span style={{fontSize:16,WebkitTextFillColor:"#ffffff50"}}>DH</span></div>
           </div>
           <div style={{textAlign:"center",background:`${ORANGE}20`,borderRadius:14,padding:"10px 16px",border:`1px solid ${ORANGE}30`}}>
             <div style={{color:ORANGE2,fontWeight:900,fontSize:20}}>{points}</div>
@@ -443,29 +320,19 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         </div>
       </div>
 
-      {/* إحصائيات */}
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}}>
-        {[{l:"الطلبات",v:3,icon:"📦",c:ORANGE},{l:"مكتملة",v:1,icon:"✅",c:GREEN},{l:"ملغية",v:1,icon:"❌",c:RED}].map((s,i)=>(
-          <div key={i} style={{background:CARD,borderRadius:16,padding:"14px 10px",textAlign:"center",border:"1px solid #ffffff0A"}}>
-            <div style={{fontSize:22}}>{s.icon}</div>
-            <div style={{color:s.c,fontWeight:900,fontSize:20,marginTop:4}}>{s.v}</div>
-            <div style={{color:"#ffffff40",fontSize:10,marginTop:2}}>{s.l}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* تنبيه مهم - قروب واتساب */}
-      <div onClick={()=>window.open("https://chat.whatsapp.com/Eh43LkrbSpF7pWs6pPEfAn","_blank")} style={{background:`${GREEN}10`,border:`1px solid ${GREEN}30`,borderRadius:18,padding:14,marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
-        <div style={{fontSize:32,flexShrink:0}}>💬</div>
-        <div style={{flex:1}}>
-          <div style={{color:GREEN,fontWeight:800,fontSize:14}}>انضم لقروب واتساب!</div>
-          <div style={{color:"#ffffff60",fontSize:12,marginTop:2}}>جميع المعاملات عبر أدمن القروب فقط 🔒</div>
-          <div style={{color:"#ffffff40",fontSize:11,marginTop:2}}>📸 Instagram: Fast.____.store</div>
+      {/* تنبيه مهم */}
+      <div style={{background:"#EF444410",border:`1px solid ${RED}30`,borderRadius:18,padding:16,marginBottom:14}}>
+        <div style={{color:RED,fontWeight:800,fontSize:14,marginBottom:6}}>📌 تنبيه مهم</div>
+        <div style={{color:"#ffffff80",fontSize:13,lineHeight:1.7}}>أي تبادل حسابات أو عملية شراء تكون <span style={{color:"#fff",fontWeight:700}}>فقط عبر أدمن القروب</span> لتفادي أي نصب.</div>
+        <div style={{display:"flex",gap:10,marginTop:12}}>
+          <a href={`https://instagram.com/${IG_USER}`} target="_blank" rel="noopener noreferrer"
+            style={{flex:1,background:"linear-gradient(135deg,#E1306C,#F77737)",borderRadius:12,padding:"9px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>📸 {IG_USER}</a>
+          <a href={WA_LINK} target="_blank" rel="noopener noreferrer"
+            style={{flex:1,background:"linear-gradient(135deg,#25D366,#128C7E)",borderRadius:12,padding:"9px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>💬 انضم للقروب</a>
         </div>
-        <div style={{color:GREEN,fontSize:22}}>‹</div>
       </div>
 
-      {/* كوبون خصم */}
+      {/* كوبون */}
       <div style={{background:CARD,borderRadius:18,padding:16,marginBottom:14,border:"1px solid #ffffff0A"}}>
         <div style={{color:"#fff",fontWeight:700,fontSize:14,marginBottom:10}}>🎁 كوبون خصم</div>
         <div style={{display:"flex",gap:8}}>
@@ -473,17 +340,14 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
             style={{flex:1,background:"#ffffff08",border:`1px solid ${couponMsg.includes("✅")?GREEN:couponMsg.includes("❌")?RED:"#ffffff20"}`,borderRadius:12,padding:"10px 14px",color:"#fff",fontSize:13}}/>
           <button onClick={checkCoupon} style={{background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:12,padding:"10px 16px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:13,whiteSpace:"nowrap"}}>تحقق</button>
         </div>
-        {couponMsg && <div style={{color:couponMsg.includes("✅")?GREEN:RED,fontSize:12,marginTop:8}}>{couponMsg}</div>}
+        {couponMsg&&<div style={{color:couponMsg.includes("✅")?GREEN:RED,fontSize:12,marginTop:8}}>{couponMsg}</div>}
         <div style={{color:"#ffffff30",fontSize:11,marginTop:8}}>💡 جرب: FAST10 • WELCOME • VIP50</div>
       </div>
 
       {/* بانر Orange */}
       <div onClick={()=>setTab("orange")} style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}30`,borderRadius:18,padding:16,marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",gap:14}}>
         <div style={{fontSize:40}}>🟠</div>
-        <div style={{flex:1}}>
-          <div style={{color:ORANGE,fontWeight:800,fontSize:15}}>شحن رصيد بـ Orange Money</div>
-          <div style={{color:"#ffffff60",fontSize:12,marginTop:3}}>أدخل كود التعبئة واحصل على رصيدك فوراً</div>
-        </div>
+        <div style={{flex:1}}><div style={{color:ORANGE,fontWeight:800,fontSize:15}}>شحن رصيد بـ Orange Money</div><div style={{color:"#ffffff60",fontSize:12,marginTop:3}}>أدخل كود التعبئة واحصل على رصيدك فوراً</div></div>
         <div style={{color:ORANGE,fontSize:22}}>‹</div>
       </div>
 
@@ -506,90 +370,64 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
       {/* عرض اليوم */}
       <div style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}30`,borderRadius:18,padding:16}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-          <div>
-            <div style={{color:ORANGE,fontWeight:800,fontSize:15}}>🎉 عرض اليوم!</div>
-            <div style={{color:"#fff",fontSize:13,marginTop:6,lineHeight:1.6}}>اشحن 50 DH واحصل على<br/><span style={{color:ORANGE2,fontWeight:700}}>5 DH هدية مجاناً</span></div>
-          </div>
-          <div style={{textAlign:"center"}}>
-            <div style={{color:"#ffffff50",fontSize:11}}>ينتهي في</div>
-            <div style={{color:ORANGE,fontWeight:900,fontSize:20}}>{fmt(timeLeft)}</div>
-          </div>
+          <div><div style={{color:ORANGE,fontWeight:800,fontSize:15}}>🎉 عرض اليوم!</div><div style={{color:"#fff",fontSize:13,marginTop:6,lineHeight:1.6}}>اشحن 50 DH واحصل على<br/><span style={{color:ORANGE2,fontWeight:700}}>5 DH هدية مجاناً</span></div></div>
+          <div style={{textAlign:"center"}}><div style={{color:"#ffffff50",fontSize:11}}>ينتهي في</div><div style={{color:ORANGE,fontWeight:900,fontSize:20}}>{fmt(timeLeft)}</div></div>
         </div>
       </div>
     </div>
   );
 }
 
-// ==================== SERVICES TAB ====================
 function ServicesTab({ onBuy }) {
-  const [sel, setSel] = useState(0);
-  const [search, setSearch] = useState("");
-  const [sort, setSort] = useState("default");
-
-  const filtered = services[sel].items.filter(item =>
-    item.name.includes(search) || item.desc.includes(search)
-  ).sort((a,b) => {
-    if (sort === "price_asc") return a.price - b.price;
-    if (sort === "price_desc") return b.price - a.price;
-    if (sort === "rating") return b.rating - a.rating;
-    if (sort === "popular") return b.sold - a.sold;
-    return 0;
+  const [sel,setSel]=useState(0); const [search,setSearch]=useState(""); const [sort,setSort]=useState("default");
+  const filtered=services[sel].items.filter(i=>i.name.includes(search)||i.desc.includes(search)).sort((a,b)=>{
+    if(sort==="price_asc")return a.price-b.price; if(sort==="price_desc")return b.price-a.price;
+    if(sort==="rating")return b.rating-a.rating; if(sort==="popular")return b.sold-a.sold; return 0;
   });
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
       <div style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:12}}>🛒 الخدمات</div>
 
-      {/* تنبيه مهم */}
-      <div style={{background:"#ffffff08",border:"1px solid #ffffff15",borderRadius:14,padding:"10px 14px",marginBottom:12,display:"flex",gap:10,alignItems:"flex-start"}}>
-        <span style={{fontSize:18}}>⚠️</span>
-        <div style={{flex:1}}>
-          <div style={{color:"#ffffff80",fontSize:12,lineHeight:1.6}}>
-            أي تبادل حسابات أو شراء يتم فقط عبر <span style={{color:ORANGE,fontWeight:700}}>أدمن القروب</span> لتفادي النصب
+      {/* تنبيه TikTok */}
+      {services[sel].category==="TikTok"&&(
+        <div style={{background:"#EF444410",border:`1px solid ${RED}30`,borderRadius:14,padding:14,marginBottom:12}}>
+          <div style={{color:RED,fontWeight:700,fontSize:13,marginBottom:4}}>📌 تنبيه – حسابات TikTok</div>
+          <div style={{color:"#ffffff70",fontSize:12,lineHeight:1.7}}>شراء الحسابات يتم <span style={{color:"#fff",fontWeight:700}}>فقط عبر أدمن القروب</span> لضمان حقوقك.</div>
+          <div style={{display:"flex",gap:8,marginTop:10}}>
+            <a href={WA_LINK} target="_blank" rel="noopener noreferrer" style={{flex:1,background:"linear-gradient(135deg,#25D366,#128C7E)",borderRadius:10,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none"}}>💬 انضم للقروب</a>
+            <a href={`https://instagram.com/${IG_USER}`} target="_blank" rel="noopener noreferrer" style={{flex:1,background:"linear-gradient(135deg,#E1306C,#F77737)",borderRadius:10,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none"}}>📸 {IG_USER}</a>
           </div>
-          <div style={{color:"#ffffff50",fontSize:11,marginTop:4}}>📸 Fast.____.store &nbsp;|&nbsp; <span onClick={()=>window.open("https://chat.whatsapp.com/Eh43LkrbSpF7pWs6pPEfAn","_blank")} style={{color:GREEN,cursor:"pointer",textDecoration:"underline"}}>رابط القروب 💬</span></div>
         </div>
-      </div>
+      )}
 
-      {/* بحث */}
       <div style={{position:"relative",marginBottom:12}}>
         <span style={{position:"absolute",right:14,top:"50%",transform:"translateY(-50%)",fontSize:16,opacity:0.5}}>🔍</span>
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="ابحث عن خدمة..."
           style={{width:"100%",background:CARD,border:"1px solid #ffffff15",borderRadius:14,padding:"12px 44px 12px 14px",color:"#fff",fontSize:14,boxSizing:"border-box"}}/>
       </div>
 
-      {/* فلتر */}
       <div style={{display:"flex",gap:8,marginBottom:12,overflowX:"auto",paddingBottom:4}}>
         {[{v:"default",l:"الكل"},{v:"price_asc",l:"سعر ↑"},{v:"price_desc",l:"سعر ↓"},{v:"rating",l:"⭐ التقييم"},{v:"popular",l:"🔥 الأكثر"}].map(s=>(
           <button key={s.v} onClick={()=>setSort(s.v)} style={{background:sort===s.v?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD,border:sort===s.v?"none":"1px solid #ffffff12",borderRadius:20,padding:"7px 14px",color:"#fff",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",fontSize:12,flexShrink:0}}>{s.l}</button>
         ))}
       </div>
 
-      {/* تبويبات الفئات */}
       <div style={{display:"flex",gap:8,marginBottom:14,overflowX:"auto",paddingBottom:4}}>
         {services.map((s,i)=>(
           <button key={s.id} onClick={()=>{setSel(i);setSearch("");}} style={{background:sel===i?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD,border:sel===i?"none":"1px solid #ffffff12",borderRadius:22,padding:"9px 16px",color:"#fff",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",fontSize:13,flexShrink:0}}>{s.icon} {s.category}</button>
         ))}
       </div>
 
-      {filtered.length === 0 ? (
-        <div style={{textAlign:"center",color:"#ffffff30",padding:"50px 0"}}>
-          <div style={{fontSize:50}}>🔍</div>
-          <div style={{marginTop:12}}>لا توجد نتائج</div>
-        </div>
-      ) : filtered.map((item,i)=>(
+      {filtered.length===0?<div style={{textAlign:"center",color:"#ffffff30",padding:"50px 0"}}><div style={{fontSize:50}}>🔍</div><div style={{marginTop:12}}>لا توجد نتائج</div></div>
+      :filtered.map((item,i)=>(
         <div key={item.id} style={{background:CARD,borderRadius:18,padding:18,marginBottom:10,border:"1px solid #ffffff0A",animation:`fadeIn 0.3s ease ${i*0.08}s both`}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12}}>
             <div style={{flex:1}}>
               <div style={{color:"#fff",fontWeight:700,fontSize:15}}>{item.name}</div>
               <div style={{color:"#ffffff50",fontSize:12,marginTop:3}}>{item.desc}</div>
-              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
-                <Stars rating={item.rating}/>
-                <span style={{color:"#ffffff30",fontSize:11}}>{item.sold} مبيعة</span>
-              </div>
-              <div style={{marginTop:8}}>
-                <span style={{background:`${ORANGE}15`,color:ORANGE,borderRadius:10,padding:"4px 12px",fontSize:13,fontWeight:700,border:`1px solid ${ORANGE}25`}}>{item.price} DH</span>
-              </div>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}><Stars rating={item.rating}/><span style={{color:"#ffffff30",fontSize:11}}>{item.sold} مبيعة</span></div>
+              <div style={{marginTop:8}}><span style={{background:`${ORANGE}15`,color:ORANGE,borderRadius:10,padding:"4px 12px",fontSize:13,fontWeight:700,border:`1px solid ${ORANGE}25`}}>{item.price} DH</span></div>
             </div>
             <button onClick={()=>onBuy(item)} style={{background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"12px 20px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:14,flexShrink:0}}>شراء</button>
           </div>
@@ -599,162 +437,80 @@ function ServicesTab({ onBuy }) {
   );
 }
 
-// ==================== ORANGE TAB ====================
 function OrangeTab({ user, balance, setBalance, showToast }) {
-  const [step, setStep] = useState(1);
-  const [plan, setPlan] = useState(null);
-  const [code, setCode] = useState("");
-  const [err, setErr] = useState("");
-  const [shake, setShake] = useState(false);
-
-  const fmtCode = v => {
-    const d = v.replace(/\D/g,"").slice(0,14);
-    return [d.slice(0,4),d.slice(4,8),d.slice(8,12),d.slice(12,14)].filter(Boolean).join(" ");
-  };
-  const reset = () => { setStep(1); setPlan(null); setCode(""); setErr(""); };
-
-  const handleSubmit = async () => {
-    const raw = code.replace(/\s/g,"");
-    if (raw.length !== 14) { setErr("❌ الكود يجب أن يكون 14 رقم"); setShake(true); setTimeout(()=>setShake(false),500); return; }
+  const [step,setStep]=useState(1); const [plan,setPlan]=useState(null);
+  const [code,setCode]=useState(""); const [err,setErr]=useState(""); const [shake,setShake]=useState(false);
+  const fmtCode=v=>{const d=v.replace(/\D/g,"").slice(0,14);return[d.slice(0,4),d.slice(4,8),d.slice(8,12),d.slice(12,14)].filter(Boolean).join(" ");};
+  const reset=()=>{setStep(1);setPlan(null);setCode("");setErr("");};
+  const handleSubmit=async()=>{
+    const raw=code.replace(/\s/g,"");
+    if(raw.length!==14){setErr("❌ الكود يجب أن يكون 14 رقم");setShake(true);setTimeout(()=>setShake(false),500);return;}
     setStep(3);
-    try {
-      const newBalance = balance + plan.dh;
-      const pointsEarned = plan.dh * 2;
-      await db.collection("users").doc(user.uid).update({
-        balance: newBalance,
-        points: firebase.firestore.FieldValue.increment(pointsEarned)
-      });
-      await db.collection("recharges").add({
-        uid: user.uid, name: user.name, email: user.email,
-        code: raw, plan_dh: plan.dh,
-        status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
+    try{
+      const newBalance=balance+plan.dh; const pts=plan.dh*2;
+      await db.collection("users").doc(user.uid).update({balance:newBalance,points:firebase.firestore.FieldValue.increment(pts)});
+      await db.collection("recharges").add({uid:user.uid,name:user.name,email:user.email,code:raw,plan_dh:plan.dh,status:"pending",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
       await sendTelegram(`🟠 *كود Orange جديد!*\n👤 ${user.name}\n✉️ ${user.email}\n🔢 \`${raw}\`\n💰 ${plan.dh} DH`);
-      setBalance(newBalance);
-      setStep(4);
-      showToast(`🏆 ربحت ${pointsEarned} نقطة!`);
-    } catch(e) {
-      setErr("حدث خطأ، حاول مجدداً");
-      setStep(5);
-    }
+      setBalance(newBalance);setStep(4);showToast(`🏆 ربحت ${pts} نقطة!`);
+    }catch(e){setErr("حدث خطأ، حاول مجدداً");setStep(5);}
   };
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
       <div style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:4}}>🟠 شحن Orange Money</div>
       <div style={{color:"#ffffff50",fontSize:13,marginBottom:16}}>اشحن واحصل على نقاط مكافآت!</div>
-
       <div style={{background:`linear-gradient(135deg,#1A1200,#2A1A00)`,border:`1px solid ${ORANGE}30`,borderRadius:18,padding:16,marginBottom:16,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div>
-          <div style={{color:"#ffffff50",fontSize:12}}>رصيدك الحالي</div>
-          <div style={{fontSize:26,fontWeight:900,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginTop:4}}><Counter value={balance}/> <span style={{fontSize:14,WebkitTextFillColor:"#ffffff50"}}>DH</span></div>
-        </div>
+        <div><div style={{color:"#ffffff50",fontSize:12}}>رصيدك الحالي</div><div style={{fontSize:26,fontWeight:900,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",marginTop:4}}><Counter value={balance}/> <span style={{fontSize:14,WebkitTextFillColor:"#ffffff50"}}>DH</span></div></div>
         <div style={{fontSize:44}}>💰</div>
       </div>
+      <div style={{background:`${GREEN}10`,border:`1px solid ${GREEN}30`,borderRadius:14,padding:12,marginBottom:16,fontSize:12,color:"#ffffff80"}}>🏆 تحصل على <span style={{color:GREEN,fontWeight:700}}>نقطتين لكل درهم</span> تشحنه!</div>
 
-      <div style={{background:`${GREEN}10`,border:`1px solid ${GREEN}30`,borderRadius:14,padding:12,marginBottom:16,fontSize:12,color:"#ffffff80"}}>
-        🏆 تحصل على <span style={{color:GREEN,fontWeight:700}}>نقطتين لكل درهم</span> تشحنه!
-      </div>
-
-      {step===1 && (
-        <>
-          <div style={{color:"#ffffff80",fontWeight:600,fontSize:14,marginBottom:10}}>اختر قيمة البطاقة</div>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-            {PLANS.map(p=>(
-              <div key={p.dh} onClick={()=>{setPlan(p);setStep(2);}} style={{background:p.popular?`${ORANGE}15`:CARD,border:`2px solid ${p.popular?ORANGE+"60":"#ffffff12"}`,borderRadius:18,padding:18,cursor:"pointer",textAlign:"center",position:"relative",transition:"transform 0.2s"}}
-                onMouseEnter={e=>e.currentTarget.style.transform="scale(1.02)"}
-                onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
-                {p.popular && <div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,color:"#fff",fontSize:10,fontWeight:700,borderRadius:10,padding:"3px 12px",whiteSpace:"nowrap"}}>⭐ الأكثر شيوعاً</div>}
-                <div style={{color:p.popular?ORANGE:"#fff",fontWeight:900,fontSize:26,marginTop:p.popular?8:0}}>{p.dh}</div>
-                <div style={{color:p.popular?ORANGE2:"#ffffff60",fontSize:13}}>درهم</div>
-                <div style={{color:GREEN,fontSize:11,marginTop:4}}>+{p.dh*2} نقطة 🏆</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      {step===2 && (
-        <>
-          <button onClick={()=>setStep(1)} style={{background:"#ffffff10",border:"none",borderRadius:12,padding:"8px 16px",color:"#fff",cursor:"pointer",fontSize:13,marginBottom:16}}>→ رجوع</button>
-          <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:14,marginBottom:16,display:"flex",justifyContent:"space-between"}}>
-            <div><div style={{color:"#ffffff60",fontSize:12}}>الباقة</div><div style={{color:ORANGE,fontWeight:900,fontSize:24}}>{plan.dh} DH</div></div>
-            <div style={{textAlign:"right"}}>
-              <div style={{color:GREEN,fontSize:12}}>مكافأة</div>
-              <div style={{color:GREEN,fontWeight:700,fontSize:16}}>+{plan.dh*2} نقطة 🏆</div>
+      {step===1&&(<>
+        <div style={{color:"#ffffff80",fontWeight:600,fontSize:14,marginBottom:10}}>اختر قيمة البطاقة</div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+          {PLANS.map(p=>(
+            <div key={p.dh} onClick={()=>{setPlan(p);setStep(2);}} style={{background:p.popular?`${ORANGE}15`:CARD,border:`2px solid ${p.popular?ORANGE+"60":"#ffffff12"}`,borderRadius:18,padding:18,cursor:"pointer",textAlign:"center",position:"relative",transition:"transform 0.2s"}}
+              onMouseEnter={e=>e.currentTarget.style.transform="scale(1.02)"} onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}>
+              {p.popular&&<div style={{position:"absolute",top:-12,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,color:"#fff",fontSize:10,fontWeight:700,borderRadius:10,padding:"3px 12px",whiteSpace:"nowrap"}}>⭐ الأكثر شيوعاً</div>}
+              <div style={{color:p.popular?ORANGE:"#fff",fontWeight:900,fontSize:26,marginTop:p.popular?8:0}}>{p.dh}</div>
+              <div style={{color:p.popular?ORANGE2:"#ffffff60",fontSize:13}}>درهم</div>
+              <div style={{color:GREEN,fontSize:11,marginTop:4}}>+{p.dh*2} نقطة 🏆</div>
             </div>
-          </div>
-          <div style={{marginBottom:8}}>
-            <div style={{color:"#ffffff60",fontSize:13,marginBottom:8}}>🔢 أدخل كود التعبئة</div>
-            <input value={code} onChange={e=>{setCode(fmtCode(e.target.value));setErr("");}} placeholder="XXXX  XXXX  XXXX  XX" maxLength={17}
-              style={{width:"100%",background:"#ffffff08",border:`2px solid ${err?"#EF4444":code.replace(/\s/g,"").length===14?ORANGE:"#ffffff15"}`,borderRadius:16,padding:"16px",color:"#fff",fontSize:22,outline:"none",boxSizing:"border-box",textAlign:"center",letterSpacing:6,fontWeight:700,animation:shake?"shake 0.4s ease":"none"}}/>
-            {err && <div style={{color:RED,fontSize:12,marginTop:8,textAlign:"center"}}>{err}</div>}
-          </div>
-          <div style={{display:"flex",justifyContent:"center",gap:4,marginBottom:16}}>
-            {[...Array(14)].map((_,i)=>(
-              <div key={i} style={{width:14,height:4,borderRadius:2,background:i<code.replace(/\s/g,"").length?ORANGE:"#ffffff15",transition:"background 0.15s"}}/>
-            ))}
-          </div>
-          <button onClick={handleSubmit} style={{width:"100%",background:code.replace(/\s/g,"").length===14?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:"#ffffff10",border:"none",borderRadius:18,padding:"16px",color:code.replace(/\s/g,"").length===14?"#fff":"#ffffff30",fontWeight:800,fontSize:16,cursor:code.replace(/\s/g,"").length===14?"pointer":"default",transition:"all 0.3s"}}>
-            ✅ إرسال الكود
-          </button>
-        </>
-      )}
-
-      {step===3 && (
-        <div style={{textAlign:"center",padding:"50px 0"}}>
-          <div style={{width:80,height:80,borderRadius:"50%",background:`conic-gradient(${ORANGE},transparent)`,margin:"0 auto 24px",animation:"spin 1s linear infinite",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <div style={{width:62,height:62,borderRadius:"50%",background:BG,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>🟠</div>
-          </div>
-          <div style={{color:"#fff",fontWeight:700,fontSize:20}}>جاري المعالجة...</div>
+          ))}
         </div>
-      )}
-
-      {step===4 && (
-        <div style={{textAlign:"center",padding:"40px 0"}}>
-          <div style={{fontSize:70,animation:"float 1s ease"}}>✅</div>
-          <div style={{color:GREEN,fontWeight:800,fontSize:22,marginTop:14}}>تم الشحن بنجاح!</div>
-          <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:16,marginTop:16}}>
-            <div style={{color:ORANGE,fontWeight:900,fontSize:30}}>{plan?.dh} DH</div>
-            <div style={{color:GREEN,fontSize:14,marginTop:4}}>+{plan?.dh*2} نقطة مكافأة 🏆</div>
-          </div>
-          <button onClick={reset} style={{marginTop:20,background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"12px 36px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:15}}>شحن مرة أخرى</button>
+      </>)}
+      {step===2&&(<>
+        <button onClick={()=>setStep(1)} style={{background:"#ffffff10",border:"none",borderRadius:12,padding:"8px 16px",color:"#fff",cursor:"pointer",fontSize:13,marginBottom:16}}>→ رجوع</button>
+        <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:14,marginBottom:16,display:"flex",justifyContent:"space-between"}}>
+          <div><div style={{color:"#ffffff60",fontSize:12}}>الباقة</div><div style={{color:ORANGE,fontWeight:900,fontSize:24}}>{plan.dh} DH</div></div>
+          <div style={{textAlign:"right"}}><div style={{color:GREEN,fontSize:12}}>مكافأة</div><div style={{color:GREEN,fontWeight:700,fontSize:16}}>+{plan.dh*2} نقطة 🏆</div></div>
         </div>
-      )}
-
-      {step===5 && (
-        <div style={{textAlign:"center",padding:"40px 0"}}>
-          <div style={{fontSize:60}}>❌</div>
-          <div style={{color:RED,fontWeight:800,fontSize:20,marginTop:14}}>فشل التحقق</div>
-          <div style={{display:"flex",gap:10,justifyContent:"center",marginTop:20}}>
-            <button onClick={()=>{setStep(2);setErr("");}} style={{background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"12px 24px",color:"#fff",fontWeight:700,cursor:"pointer"}}>حاول مجدداً</button>
-            <button onClick={reset} style={{background:"#ffffff10",border:"none",borderRadius:14,padding:"12px 24px",color:"#fff",fontWeight:700,cursor:"pointer"}}>تغيير الباقة</button>
-          </div>
+        <div style={{marginBottom:8}}>
+          <div style={{color:"#ffffff60",fontSize:13,marginBottom:8}}>🔢 أدخل كود التعبئة</div>
+          <input value={code} onChange={e=>{setCode(fmtCode(e.target.value));setErr("");}} placeholder="XXXX  XXXX  XXXX  XX" maxLength={17}
+            style={{width:"100%",background:"#ffffff08",border:`2px solid ${err?"#EF4444":code.replace(/\s/g,"").length===14?ORANGE:"#ffffff15"}`,borderRadius:16,padding:"16px",color:"#fff",fontSize:22,outline:"none",boxSizing:"border-box",textAlign:"center",letterSpacing:6,fontWeight:700,animation:shake?"shake 0.4s ease":"none"}}/>
+          {err&&<div style={{color:RED,fontSize:12,marginTop:8,textAlign:"center"}}>{err}</div>}
         </div>
-      )}
+        <div style={{display:"flex",justifyContent:"center",gap:4,marginBottom:16}}>{[...Array(14)].map((_,i)=><div key={i} style={{width:14,height:4,borderRadius:2,background:i<code.replace(/\s/g,"").length?ORANGE:"#ffffff15",transition:"background 0.15s"}}/>)}</div>
+        <button onClick={handleSubmit} style={{width:"100%",background:code.replace(/\s/g,"").length===14?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:"#ffffff10",border:"none",borderRadius:18,padding:"16px",color:code.replace(/\s/g,"").length===14?"#fff":"#ffffff30",fontWeight:800,fontSize:16,cursor:code.replace(/\s/g,"").length===14?"pointer":"default",transition:"all 0.3s"}}>✅ إرسال الكود</button>
+      </>)}
+      {step===3&&<div style={{textAlign:"center",padding:"50px 0"}}><div style={{width:80,height:80,borderRadius:"50%",background:`conic-gradient(${ORANGE},transparent)`,margin:"0 auto 24px",animation:"spin 1s linear infinite",display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:62,height:62,borderRadius:"50%",background:BG,display:"flex",alignItems:"center",justifyContent:"center",fontSize:28}}>🟠</div></div><div style={{color:"#fff",fontWeight:700,fontSize:20}}>جاري المعالجة...</div></div>}
+      {step===4&&<div style={{textAlign:"center",padding:"40px 0"}}><div style={{fontSize:70,animation:"float 1s ease"}}>✅</div><div style={{color:GREEN,fontWeight:800,fontSize:22,marginTop:14}}>تم الشحن بنجاح!</div><div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:16,marginTop:16}}><div style={{color:ORANGE,fontWeight:900,fontSize:30}}>{plan?.dh} DH</div><div style={{color:GREEN,fontSize:14,marginTop:4}}>+{plan?.dh*2} نقطة مكافأة 🏆</div></div><button onClick={reset} style={{marginTop:20,background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"12px 36px",color:"#fff",fontWeight:700,cursor:"pointer",fontSize:15}}>شحن مرة أخرى</button></div>}
+      {step===5&&<div style={{textAlign:"center",padding:"40px 0"}}><div style={{fontSize:60}}>❌</div><div style={{color:RED,fontWeight:800,fontSize:20,marginTop:14}}>فشل التحقق</div><div style={{display:"flex",gap:10,justifyContent:"center",marginTop:20}}><button onClick={()=>{setStep(2);setErr("");}} style={{background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:14,padding:"12px 24px",color:"#fff",fontWeight:700,cursor:"pointer"}}>حاول مجدداً</button><button onClick={reset} style={{background:"#ffffff10",border:"none",borderRadius:14,padding:"12px 24px",color:"#fff",fontWeight:700,cursor:"pointer"}}>تغيير الباقة</button></div></div>}
     </div>
   );
 }
 
-// ==================== ORDERS TAB ====================
 function OrdersTab({ user }) {
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoad] = useState(true);
-  const [filter, setFilter] = useState("all");
-
-  useEffect(() => {
-    if (!user?.uid) return;
-    const unsub = db.collection("orders").where("uid","==",user.uid)
-      .orderBy("createdAt","desc").onSnapshot(snap => {
-        setOrders(snap.docs.map(d=>({id:d.id,...d.data()})));
-        setLoad(false);
-      }, () => setLoad(false));
-    return () => unsub();
-  }, [user]);
-
-  const SC = {completed:GREEN, pending:ORANGE, cancelled:RED};
-  const SL = {completed:"مكتمل ✅", pending:"قيد التنفيذ ⏳", cancelled:"ملغي ❌"};
-  const filtered = filter === "all" ? orders : orders.filter(o => o.status === filter);
+  const [orders,setOrders]=useState([]); const [loading,setLoad]=useState(true); const [filter,setFilter]=useState("all");
+  useEffect(()=>{
+    if(!user?.uid)return;
+    const unsub=db.collection("orders").where("uid","==",user.uid).orderBy("createdAt","desc").onSnapshot(s=>{setOrders(s.docs.map(d=>({id:d.id,...d.data()})));setLoad(false);},()=>setLoad(false));
+    return()=>unsub();
+  },[user]);
+  const SC={completed:GREEN,pending:ORANGE,cancelled:RED};
+  const SL={completed:"مكتمل ✅",pending:"قيد التنفيذ ⏳",cancelled:"ملغي ❌"};
+  const filtered=filter==="all"?orders:orders.filter(o=>o.status===filter);
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
@@ -767,115 +523,145 @@ function OrdersTab({ user }) {
           <button key={f.v} onClick={()=>setFilter(f.v)} style={{background:filter===f.v?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD,border:filter===f.v?"none":"1px solid #ffffff12",borderRadius:20,padding:"7px 14px",color:"#fff",fontWeight:600,cursor:"pointer",whiteSpace:"nowrap",fontSize:12,flexShrink:0}}>{f.l}</button>
         ))}
       </div>
-      {loading ? (
-        <div style={{textAlign:"center",padding:"60px 0"}}><div style={{width:40,height:40,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
-      ) : filtered.length===0 ? (
-        <div style={{textAlign:"center",color:"#ffffff30",padding:"60px 0"}}><div style={{fontSize:50}}>📭</div><div style={{marginTop:12,fontSize:15}}>لا توجد طلبات</div></div>
-      ) : filtered.map((o,i)=>(
+      {loading?<div style={{textAlign:"center",padding:"60px 0"}}><div style={{width:40,height:40,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
+      :filtered.length===0?<div style={{textAlign:"center",color:"#ffffff30",padding:"60px 0"}}><div style={{fontSize:50}}>📭</div><div style={{marginTop:12,fontSize:15}}>لا توجد طلبات</div></div>
+      :filtered.map((o,i)=>(
         <div key={o.id} style={{background:CARD,borderRadius:18,padding:16,marginBottom:10,border:"1px solid #ffffff0A",animation:`fadeIn 0.3s ease ${i*0.1}s both`}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
             <div style={{flex:1}}>
               <div style={{color:ORANGE,fontWeight:700,fontSize:11,marginBottom:3}}>#{o.id.slice(0,8).toUpperCase()}</div>
               <div style={{color:"#fff",fontWeight:600,fontSize:14}}>{o.service}</div>
               <div style={{color:"#ffffff40",fontSize:12,marginTop:3}}>👤 {o.username}</div>
-              <div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>📅 {o.createdAt?.toDate?.()?.toLocaleDateString('ar') || "الآن"}</div>
+              <div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>📅 {o.createdAt?.toDate?.()?.toLocaleDateString('ar')||"الآن"}</div>
             </div>
             <div style={{textAlign:"right",flexShrink:0}}>
               <div style={{background:`${SC[o.status]||ORANGE}15`,color:SC[o.status]||ORANGE,borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700}}>{SL[o.status]||"⏳"}</div>
               <div style={{color:"#ffffff60",fontSize:14,marginTop:6,fontWeight:700}}>{o.price} DH</div>
             </div>
           </div>
-          {o.status==="pending" && (
-            <div style={{marginTop:12}}>
-              <div style={{height:4,background:"#ffffff0A",borderRadius:4,overflow:"hidden"}}>
-                <div style={{width:"60%",height:"100%",background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,borderRadius:4,animation:"pulse 1.5s ease-in-out infinite"}}/>
-              </div>
-              <div style={{color:"#ffffff30",fontSize:11,marginTop:4}}>جاري معالجة الطلب...</div>
-            </div>
-          )}
+          {o.status==="pending"&&<div style={{marginTop:12}}><div style={{height:4,background:"#ffffff0A",borderRadius:4,overflow:"hidden"}}><div style={{width:"60%",height:"100%",background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,borderRadius:4,animation:"pulse 1.5s ease-in-out infinite"}}/></div><div style={{color:"#ffffff30",fontSize:11,marginTop:4}}>جاري معالجة الطلب...</div></div>}
         </div>
       ))}
     </div>
   );
 }
 
-// ==================== SUPPORT TAB ====================
+// ==================== دعم AI ====================
 function SupportTab({ user, showToast }) {
   const [msgs, setMsgs] = useState([]);
   const [text, setText] = useState("");
-  const [loading, setLoad] = useState(true);
-  const [sending, setSend] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const endRef = useRef(null);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    const unsub = db.collection("support").where("uid","==",user.uid)
-      .orderBy("createdAt","asc").onSnapshot(snap => {
-        setMsgs(snap.docs.map(d=>({id:d.id,...d.data()})));
-        setLoad(false);
-      }, () => setLoad(false));
-    return () => unsub();
-  }, [user]);
+  // رسائل ترحيب افتراضية
+  const welcomeMsgs = [
+    { id:"w1", from:"ai", text:`أهلاً ${user.name}! 👋 أنا مساعد FAST STORE الذكي.\nكيف يمكنني مساعدتك اليوم؟`, time: new Date() },
+  ];
 
-  useEffect(() => { endRef.current?.scrollIntoView({behavior:"smooth"}); }, [msgs]);
+  useEffect(()=>{ endRef.current?.scrollIntoView({behavior:"smooth"}); },[msgs,aiLoading]);
 
   const send = async () => {
-    if (!text.trim() || sending) return;
-    setSend(true);
+    if (!text.trim() || aiLoading) return;
+    const userMsg = { id: Date.now()+"u", from:"user", text: text.trim(), time: new Date() };
+    const newMsgs = [...msgs, userMsg];
+    setMsgs(newMsgs);
+    setText("");
+    setAiLoading(true);
+
+    // بناء تاريخ المحادثة للـ AI
+    const history = newMsgs.map(m=>({ role: m.from==="user"?"user":"assistant", content: m.text }));
+
     try {
-      await db.collection("support").add({
-        uid: user.uid, name: user.name, email: user.email,
-        text: text.trim(), from: "user",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      await sendTelegram(`💬 *رسالة دعم جديدة!*\n👤 ${user.name}\n✉️ ${user.email}\n📝 ${text.trim()}`);
-      setText("");
-    } catch(e) { showToast("❌ فشل الإرسال"); }
-    setSend(false);
+      const reply = await askAI(history);
+      setMsgs(prev=>[...prev, { id: Date.now()+"a", from:"ai", text: reply, time: new Date() }]);
+    } catch(e) {
+      setMsgs(prev=>[...prev, { id: Date.now()+"a", from:"ai", text:"عذراً، حدث خطأ. حاول مرة أخرى أو تواصل معنا عبر WhatsApp.", time: new Date() }]);
+    }
+    setAiLoading(false);
   };
+
+  const allMsgs = [...welcomeMsgs, ...msgs];
+  const quickReplies = ["ما هي الخدمات المتاحة؟", "كيف أشحن رصيدي؟", "كيف أشتري متابعين؟", "كيف أتواصل مع الأدمن؟"];
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease",display:"flex",flexDirection:"column",height:"calc(100vh - 160px)"}}>
-      <div style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:4}}>💬 الدعم الفني</div>
-      <div style={{color:"#ffffff50",fontSize:13,marginBottom:14}}>فريقنا متاح 24/7 لمساعدتك</div>
-      <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
-        <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:18,borderBottomLeftRadius:4,padding:14,maxWidth:"80%"}}>
-          <div style={{color:"#ffffff80",fontSize:11,marginBottom:6}}>⚡ FAST STORE Bot</div>
-          <div style={{color:"#fff",fontSize:14}}>أهلاً {user.name}! كيف يمكننا مساعدتك اليوم؟ 😊</div>
+      {/* Header */}
+      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,background:CARD,borderRadius:16,padding:"12px 14px",border:"1px solid #ffffff0A"}}>
+        <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,animation:"glow 3s ease-in-out infinite"}}>🤖</div>
+        <div style={{flex:1}}>
+          <div style={{color:"#fff",fontWeight:700,fontSize:14}}>مساعد FAST STORE</div>
+          <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:GREEN,animation:"pulse 2s infinite"}}/>
+            <div style={{color:GREEN,fontSize:11}}>متصل دائماً • مدعوم بالذكاء الاصطناعي</div>
+          </div>
         </div>
-        {loading ? (
-          <div style={{textAlign:"center",padding:"20px"}}><div style={{width:30,height:30,borderRadius:"50%",border:`2px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
-        ) : msgs.map((m,i)=>(
-          <div key={m.id} style={{alignSelf:m.from==="user"?"flex-end":"flex-start",background:m.from==="user"?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD2,borderRadius:18,borderBottomRightRadius:m.from==="user"?4:18,borderBottomLeftRadius:m.from!=="user"?4:18,padding:"12px 16px",maxWidth:"80%",animation:`fadeIn 0.3s ease ${i*0.05}s both`}}>
-            {m.from !== "user" && <div style={{color:"#ffffff60",fontSize:11,marginBottom:4}}>⚡ الدعم</div>}
-            <div style={{color:"#fff",fontSize:14}}>{m.text}</div>
-            <div style={{color:"#ffffff50",fontSize:10,marginTop:4,textAlign:"left"}}>{m.createdAt?.toDate?.()?.toLocaleTimeString('ar',{hour:"2-digit",minute:"2-digit"}) || ""}</div>
+        <div style={{background:`${ORANGE}15`,borderRadius:10,padding:"4px 10px",fontSize:11,color:ORANGE,fontWeight:700}}>AI ⚡</div>
+      </div>
+
+      {/* روابط سريعة */}
+      <div style={{display:"flex",gap:8,marginBottom:10}}>
+        <a href={WA_LINK} target="_blank" rel="noopener noreferrer"
+          style={{flex:1,background:"linear-gradient(135deg,#25D366,#128C7E)",borderRadius:12,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>💬 WhatsApp</a>
+        <a href={`https://instagram.com/${IG_USER}`} target="_blank" rel="noopener noreferrer"
+          style={{flex:1,background:"linear-gradient(135deg,#E1306C,#F77737)",borderRadius:12,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>📸 Instagram</a>
+      </div>
+
+      {/* المحادثة */}
+      <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
+        {allMsgs.map((m,i)=>(
+          <div key={m.id} style={{alignSelf:m.from==="user"?"flex-end":"flex-start",maxWidth:"82%",animation:`fadeIn 0.3s ease ${i*0.03}s both`}}>
+            {m.from==="ai"&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><div style={{width:22,height:22,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>🤖</div><span style={{color:"#ffffff50",fontSize:11}}>المساعد الذكي</span></div>}
+            <div style={{background:m.from==="user"?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD2,borderRadius:18,borderBottomRightRadius:m.from==="user"?4:18,borderBottomLeftRadius:m.from==="ai"?4:18,padding:"12px 16px",border:m.from==="ai"?"1px solid #ffffff0A":"none"}}>
+              <div style={{color:"#fff",fontSize:14,lineHeight:1.6,whiteSpace:"pre-wrap"}}>{m.text}</div>
+              <div style={{color:"#ffffff40",fontSize:10,marginTop:4,textAlign:"left"}}>{m.time?.toLocaleTimeString('ar',{hour:"2-digit",minute:"2-digit"})||""}</div>
+            </div>
           </div>
         ))}
+
+        {/* مؤشر الكتابة */}
+        {aiLoading&&(
+          <div style={{alignSelf:"flex-start",maxWidth:"82%"}}>
+            <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><div style={{width:22,height:22,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>🤖</div><span style={{color:"#ffffff50",fontSize:11}}>يكتب...</span></div>
+            <div style={{background:CARD2,borderRadius:18,borderBottomLeftRadius:4,padding:"14px 18px",border:"1px solid #ffffff0A",display:"flex",gap:5,alignItems:"center"}}>
+              {[0,1,2].map(i=><div key={i} style={{width:8,height:8,borderRadius:"50%",background:ORANGE,animation:`typing 1.4s ease-in-out ${i*0.2}s infinite`}}/>)}
+            </div>
+          </div>
+        )}
+
+        {/* أسئلة سريعة */}
+        {msgs.length===0&&!aiLoading&&(
+          <div style={{marginTop:8}}>
+            <div style={{color:"#ffffff40",fontSize:12,marginBottom:8,textAlign:"center"}}>اسأل مباشرة أو اختر سؤالاً:</div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {quickReplies.map((q,i)=>(
+                <button key={i} onClick={()=>{setText(q);}} style={{background:"#ffffff08",border:`1px solid ${ORANGE}30`,borderRadius:14,padding:"10px 14px",color:"#ffffff90",fontSize:13,cursor:"pointer",textAlign:"right",fontFamily:"'Segoe UI',Tahoma,sans-serif"}}>
+                  ⚡ {q}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div ref={endRef}/>
       </div>
+
+      {/* حقل الكتابة */}
       <div style={{display:"flex",gap:10,marginTop:10}}>
-        <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="اكتب رسالتك هنا..." rows={2}
+        <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="اكتب سؤالك هنا..." rows={2}
           onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
-          style={{flex:1,background:CARD,border:"1px solid #ffffff15",borderRadius:14,padding:"12px 14px",color:"#fff",fontSize:14,resize:"none",lineHeight:1.5}}/>
-        <button onClick={send} disabled={!text.trim()||sending}
-          style={{background:text.trim()?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:"#ffffff10",border:"none",borderRadius:14,padding:"0 18px",color:"#fff",fontWeight:700,cursor:text.trim()?"pointer":"default",fontSize:18,flexShrink:0}}>
-          {sending?"⏳":"📤"}
+          style={{flex:1,background:CARD,border:`1px solid ${text?"#ffffff25":"#ffffff15"}`,borderRadius:14,padding:"12px 14px",color:"#fff",fontSize:14,resize:"none",lineHeight:1.5}}/>
+        <button onClick={send} disabled={!text.trim()||aiLoading}
+          style={{background:text.trim()&&!aiLoading?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:"#ffffff10",border:"none",borderRadius:14,padding:"0 18px",color:"#fff",fontWeight:700,cursor:text.trim()&&!aiLoading?"pointer":"default",fontSize:18,flexShrink:0}}>
+          {aiLoading?"⏳":"📤"}
         </button>
       </div>
     </div>
   );
 }
 
-// ==================== PROFILE TAB ====================
 function ProfileTab({ user, balance, points, setTab, onLogout, showToast }) {
-  const [notifOn, setNotifOn] = useState(true);
-  const levelInfo = points < 500 ? {l:"برونزي 🥉",c:"#CD7F32",next:500}
-    : points < 1500 ? {l:"فضي 🥈",c:"#C0C0C0",next:1500}
-    : points < 3000 ? {l:"ذهبي 🥇",c:"#FFD700",next:3000}
-    : {l:"ماسي 💎",c:"#B9F2FF",next:Infinity};
-  const prog = levelInfo.next === Infinity ? 100 : Math.min(100, (points / levelInfo.next) * 100);
-
+  const [notifOn,setNotifOn]=useState(true);
+  const levelInfo=points<500?{l:"برونزي 🥉",c:"#CD7F32",next:500}:points<1500?{l:"فضي 🥈",c:"#C0C0C0",next:1500}:points<3000?{l:"ذهبي 🥇",c:"#FFD700",next:3000}:{l:"ماسي 💎",c:"#B9F2FF",next:Infinity};
+  const prog=levelInfo.next===Infinity?100:Math.min(100,(points/levelInfo.next)*100);
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
       <div style={{textAlign:"center",padding:"20px 0 24px"}}>
@@ -887,25 +673,13 @@ function ProfileTab({ user, balance, points, setTab, onLogout, showToast }) {
             <div><div style={{color:"#ffffff60",fontSize:11}}>المستوى الحالي</div><div style={{color:levelInfo.c,fontWeight:700,fontSize:16,marginTop:2}}>{levelInfo.l}</div></div>
             <div style={{textAlign:"right"}}><div style={{color:"#ffffff60",fontSize:11}}>النقاط</div><div style={{color:ORANGE2,fontWeight:900,fontSize:20,marginTop:2}}>{points}</div></div>
           </div>
-          {levelInfo.next !== Infinity && (
-            <>
-              <div style={{height:6,background:"#ffffff10",borderRadius:6,overflow:"hidden"}}><div style={{height:"100%",borderRadius:6,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,width:`${prog}%`,transition:"width 1s"}}/></div>
-              <div style={{color:"#ffffff30",fontSize:11,marginTop:6}}>{points} / {levelInfo.next} للمستوى التالي</div>
-            </>
-          )}
+          {levelInfo.next!==Infinity&&<><div style={{height:6,background:"#ffffff10",borderRadius:6,overflow:"hidden"}}><div style={{height:"100%",borderRadius:6,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,width:`${prog}%`,transition:"width 1s"}}/></div><div style={{color:"#ffffff30",fontSize:11,marginTop:6}}>{points} / {levelInfo.next} للمستوى التالي</div></>}
         </div>
         <div style={{display:"flex",gap:10,marginTop:12}}>
-          <div style={{flex:1,background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:14,textAlign:"center"}}>
-            <div style={{color:ORANGE,fontWeight:900,fontSize:22}}><Counter value={balance}/></div>
-            <div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>رصيد (DH)</div>
-          </div>
-          <div style={{flex:1,background:`${GREEN}10`,border:`1px solid ${GREEN}30`,borderRadius:16,padding:14,textAlign:"center"}}>
-            <div style={{color:GREEN,fontWeight:900,fontSize:22}}>🏆</div>
-            <div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>عضو {levelInfo.l.split(" ")[0]}</div>
-          </div>
+          <div style={{flex:1,background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:16,padding:14,textAlign:"center"}}><div style={{color:ORANGE,fontWeight:900,fontSize:22}}><Counter value={balance}/></div><div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>رصيد (DH)</div></div>
+          <div style={{flex:1,background:`${GREEN}10`,border:`1px solid ${GREEN}30`,borderRadius:16,padding:14,textAlign:"center"}}><div style={{color:GREEN,fontWeight:900,fontSize:22}}>🏆</div><div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>عضو {levelInfo.l.split(" ")[0]}</div></div>
         </div>
       </div>
-
       <div style={{color:"#ffffff60",fontSize:12,marginBottom:10,fontWeight:600}}>الإعدادات</div>
       <div style={{background:CARD,borderRadius:16,padding:"14px 16px",marginBottom:8,border:"1px solid #ffffff08",display:"flex",alignItems:"center",gap:12}}>
         <div style={{width:44,height:44,borderRadius:12,fontSize:22,background:"#ffffff08",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>🔔</div>
@@ -914,13 +688,11 @@ function ProfileTab({ user, balance, points, setTab, onLogout, showToast }) {
           <div style={{position:"absolute",top:4,right:notifOn?4:undefined,left:notifOn?undefined:4,width:20,height:20,borderRadius:"50%",background:"#fff",transition:"all 0.3s"}}/>
         </div>
       </div>
-
       {[
         {icon:"🟠",l:"شحن Orange Money",d:"تعبئة رصيدك",action:()=>setTab("orange"),highlight:true},
-        {icon:"💬",l:"الدعم الفني",d:"تواصل معنا 24/7",action:()=>setTab("support")},
-        {icon:"💬",l:"قروب واتساب",d:"انضم للمجتمع 🔗",action:()=>window.open("https://chat.whatsapp.com/Eh43LkrbSpF7pWs6pPEfAn","_blank")},
-        {icon:"📸",l:"إنستغرام",d:"Fast.____.store",action:()=>window.open("https://instagram.com/fast.____.store","_blank")},
-        {icon:"📋",l:"الشروط والسياسة",d:"اقرأ شروط الخدمة"},
+        {icon:"🤖",l:"الدعم الذكي",d:"تحدث مع مساعد AI",action:()=>setTab("support")},
+        {icon:"💬",l:"مجموعة واتساب",d:"انضم لمجتمعنا",action:()=>window.open(WA_LINK,"_blank")},
+        {icon:"📸",l:"إنستغرام",d:`@${IG_USER}`,action:()=>window.open(`https://instagram.com/${IG_USER}`,"_blank")},
         {icon:"⭐",l:"قيّمنا",d:"ساعدنا في التحسين",action:()=>showToast("شكراً على تقييمك! ⭐")},
         {icon:"🚪",l:"تسجيل الخروج",d:"الخروج من الحساب",danger:true,action:onLogout},
       ].map((m,i)=>(
@@ -934,55 +706,30 @@ function ProfileTab({ user, balance, points, setTab, onLogout, showToast }) {
   );
 }
 
-// ==================== ADMIN TAB ====================
 function AdminTab({ user, showToast }) {
-  const [orders, setOrders] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [tab, setTab] = useState("orders");
-  const [loading, setLoad] = useState(true);
-
-  useEffect(() => {
-    const unsub1 = db.collection("orders").orderBy("createdAt","desc").limit(50)
-      .onSnapshot(snap => { setOrders(snap.docs.map(d=>({id:d.id,...d.data()}))); setLoad(false); }, ()=>setLoad(false));
-    const unsub2 = db.collection("users").orderBy("createdAt","desc").limit(30)
-      .onSnapshot(snap => { setUsers(snap.docs.map(d=>({id:d.id,...d.data()}))); }, ()=>{});
-    return () => { unsub1(); unsub2(); };
-  }, []);
-
-  const updateStatus = async (orderId, status) => {
-    try {
-      await db.collection("orders").doc(orderId).update({ status });
-      const order = orders.find(o=>o.id===orderId);
-      if (order) {
-        await db.collection("notifications").add({
-          uid: order.uid,
-          title: status === "completed" ? "✅ تم إكمال طلبك!" : "❌ تم إلغاء طلبك",
-          body: `طلب ${order.service} - ${order.price} DH`,
-          read: false,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      showToast(status === "completed" ? "✅ تم إكمال الطلب" : "❌ تم إلغاء الطلب");
-    } catch(e) { showToast("❌ فشل التحديث"); }
+  const [orders,setOrders]=useState([]); const [users,setUsers]=useState([]); const [tab,setTab]=useState("orders"); const [loading,setLoad]=useState(true);
+  useEffect(()=>{
+    const u1=db.collection("orders").orderBy("createdAt","desc").limit(50).onSnapshot(s=>{setOrders(s.docs.map(d=>({id:d.id,...d.data()})));setLoad(false);},()=>setLoad(false));
+    const u2=db.collection("users").orderBy("createdAt","desc").limit(30).onSnapshot(s=>setUsers(s.docs.map(d=>({id:d.id,...d.data()}))),()=>{});
+    return()=>{u1();u2();};
+  },[]);
+  const updateStatus=async(id,status)=>{
+    try{
+      await db.collection("orders").doc(id).update({status});
+      const o=orders.find(x=>x.id===id);
+      if(o)await db.collection("notifications").add({uid:o.uid,title:status==="completed"?"✅ تم إكمال طلبك!":"❌ تم إلغاء طلبك",body:`طلب ${o.service} - ${o.price} DH`,read:false,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      showToast(status==="completed"?"✅ تم إكمال الطلب":"❌ تم إلغاء الطلب");
+    }catch(e){showToast("❌ فشل التحديث");}
   };
-
-  const SC = {completed:GREEN, pending:ORANGE, cancelled:RED};
-  const SL = {completed:"مكتمل", pending:"جاري", cancelled:"ملغي"};
-  const stats = { total:orders.length, pending:orders.filter(o=>o.status==="pending").length, completed:orders.filter(o=>o.status==="completed").length, revenue:orders.filter(o=>o.status==="completed").reduce((a,o)=>a+(o.price||0),0) };
-
+  const SC={completed:GREEN,pending:ORANGE,cancelled:RED};
+  const SL={completed:"مكتمل",pending:"جاري",cancelled:"ملغي"};
+  const stats={total:orders.length,pending:orders.filter(o=>o.status==="pending").length,completed:orders.filter(o=>o.status==="completed").length,revenue:orders.filter(o=>o.status==="completed").reduce((a,o)=>a+(o.price||0),0)};
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
-        <div style={{color:"#fff",fontWeight:700,fontSize:18}}>⚙️ لوحة الأدمن</div>
-        <div style={{background:"#EF444415",color:RED,borderRadius:10,padding:"3px 10px",fontSize:11,fontWeight:700,border:`1px solid ${RED}30`}}>ADMIN</div>
-      </div>
+      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}><div style={{color:"#fff",fontWeight:700,fontSize:18}}>⚙️ لوحة الأدمن</div><div style={{background:"#EF444415",color:RED,borderRadius:10,padding:"3px 10px",fontSize:11,fontWeight:700,border:`1px solid ${RED}30`}}>ADMIN</div></div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:16}}>
         {[{l:"إجمالي الطلبات",v:stats.total,icon:"📦",c:ORANGE},{l:"قيد التنفيذ",v:stats.pending,icon:"⏳",c:"#FFB800"},{l:"مكتملة",v:stats.completed,icon:"✅",c:GREEN},{l:"الإيرادات",v:`${stats.revenue} DH`,icon:"💰",c:ORANGE2}].map((s,i)=>(
-          <div key={i} style={{background:CARD,borderRadius:16,padding:16,border:"1px solid #ffffff0A"}}>
-            <div style={{fontSize:24}}>{s.icon}</div>
-            <div style={{color:s.c,fontWeight:900,fontSize:20,marginTop:6}}>{s.v}</div>
-            <div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>{s.l}</div>
-          </div>
+          <div key={i} style={{background:CARD,borderRadius:16,padding:16,border:"1px solid #ffffff0A"}}><div style={{fontSize:24}}>{s.icon}</div><div style={{color:s.c,fontWeight:900,fontSize:20,marginTop:6}}>{s.v}</div><div style={{color:"#ffffff40",fontSize:11,marginTop:3}}>{s.l}</div></div>
         ))}
       </div>
       <div style={{display:"flex",gap:8,marginBottom:14}}>
@@ -990,151 +737,104 @@ function AdminTab({ user, showToast }) {
           <button key={t.v} onClick={()=>setTab(t.v)} style={{background:tab===t.v?`linear-gradient(135deg,${ORANGE},${ORANGE2})`:CARD,border:tab===t.v?"none":"1px solid #ffffff12",borderRadius:20,padding:"8px 18px",color:"#fff",fontWeight:600,cursor:"pointer",fontSize:13}}>{t.l}</button>
         ))}
       </div>
-      {loading ? (
-        <div style={{textAlign:"center",padding:"40px"}}><div style={{width:40,height:40,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
-      ) : tab === "orders" ? (
-        orders.length === 0 ? <div style={{textAlign:"center",color:"#ffffff30",padding:"40px"}}>لا توجد طلبات</div>
-        : orders.map((o,i)=>(
-          <div key={o.id} style={{background:CARD,borderRadius:18,padding:16,marginBottom:10,border:"1px solid #ffffff0A"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
-              <div>
-                <div style={{color:ORANGE,fontWeight:700,fontSize:11}}>#{o.id.slice(0,8).toUpperCase()}</div>
-                <div style={{color:"#fff",fontWeight:600,fontSize:14,marginTop:3}}>{o.service}</div>
-                <div style={{color:"#ffffff50",fontSize:12,marginTop:2}}>👤 {o.name} • 📱 {o.username}</div>
-                <div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>📅 {o.createdAt?.toDate?.()?.toLocaleString('ar') || "الآن"}</div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{background:`${SC[o.status]||ORANGE}15`,color:SC[o.status]||ORANGE,borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700}}>{SL[o.status]||"جاري"}</div>
-                <div style={{color:"#ffffff60",fontSize:14,marginTop:6,fontWeight:700}}>{o.price} DH</div>
-              </div>
-            </div>
-            {o.status === "pending" && (
-              <div style={{display:"flex",gap:8}}>
-                <button onClick={()=>updateStatus(o.id,"completed")} style={{flex:1,background:`${GREEN}20`,border:`1px solid ${GREEN}40`,borderRadius:12,padding:"9px",color:GREEN,fontWeight:700,cursor:"pointer",fontSize:13}}>✅ إكمال</button>
-                <button onClick={()=>updateStatus(o.id,"cancelled")} style={{flex:1,background:"#EF444415",border:"1px solid #EF444430",borderRadius:12,padding:"9px",color:RED,fontWeight:700,cursor:"pointer",fontSize:13}}>❌ إلغاء</button>
-              </div>
-            )}
+      {loading?<div style={{textAlign:"center",padding:"40px"}}><div style={{width:40,height:40,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
+      :tab==="orders"?(orders.length===0?<div style={{textAlign:"center",color:"#ffffff30",padding:"40px"}}>لا توجد طلبات</div>:orders.map((o)=>(
+        <div key={o.id} style={{background:CARD,borderRadius:18,padding:16,marginBottom:10,border:"1px solid #ffffff0A"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+            <div><div style={{color:ORANGE,fontWeight:700,fontSize:11}}>#{o.id.slice(0,8).toUpperCase()}</div><div style={{color:"#fff",fontWeight:600,fontSize:14,marginTop:3}}>{o.service}</div><div style={{color:"#ffffff50",fontSize:12,marginTop:2}}>👤 {o.name} • 📱 {o.username}</div><div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>📅 {o.createdAt?.toDate?.()?.toLocaleString('ar')||"الآن"}</div></div>
+            <div style={{textAlign:"right"}}><div style={{background:`${SC[o.status]||ORANGE}15`,color:SC[o.status]||ORANGE,borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:700}}>{SL[o.status]||"جاري"}</div><div style={{color:"#ffffff60",fontSize:14,marginTop:6,fontWeight:700}}>{o.price} DH</div></div>
           </div>
-        ))
-      ) : (
-        users.map((u,i)=>(
-          <div key={u.id} style={{background:CARD,borderRadius:18,padding:16,marginBottom:10,border:"1px solid #ffffff0A"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div style={{display:"flex",alignItems:"center",gap:12}}>
-                <div style={{width:44,height:44,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>👤</div>
-                <div>
-                  <div style={{color:"#fff",fontWeight:600,fontSize:14}}>{u.name}</div>
-                  <div style={{color:"#ffffff50",fontSize:12}}>{u.email}</div>
-                  <div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>🏆 {u.points||0} نقطة</div>
-                </div>
-              </div>
-              <div style={{textAlign:"right"}}>
-                <div style={{color:ORANGE,fontWeight:700,fontSize:16}}>{u.balance||0} DH</div>
-                <div style={{color:"#ffffff40",fontSize:11}}>الرصيد</div>
-              </div>
+          {o.status==="pending"&&<div style={{display:"flex",gap:8}}><button onClick={()=>updateStatus(o.id,"completed")} style={{flex:1,background:`${GREEN}20`,border:`1px solid ${GREEN}40`,borderRadius:12,padding:"9px",color:GREEN,fontWeight:700,cursor:"pointer",fontSize:13}}>✅ إكمال</button><button onClick={()=>updateStatus(o.id,"cancelled")} style={{flex:1,background:"#EF444415",border:"1px solid #EF444430",borderRadius:12,padding:"9px",color:RED,fontWeight:700,cursor:"pointer",fontSize:13}}>❌ إلغاء</button></div>}
+        </div>
+      ))):users.map((u)=>(
+        <div key={u.id} style={{background:CARD,borderRadius:18,padding:16,marginBottom:10,border:"1px solid #ffffff0A"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+            <div style={{display:"flex",alignItems:"center",gap:12}}>
+              <div style={{width:44,height:44,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0}}>👤</div>
+              <div><div style={{color:"#fff",fontWeight:600,fontSize:14}}>{u.name}</div><div style={{color:"#ffffff50",fontSize:12}}>{u.email}</div><div style={{color:"#ffffff30",fontSize:11,marginTop:2}}>🏆 {u.points||0} نقطة</div></div>
             </div>
+            <div style={{textAlign:"right"}}><div style={{color:ORANGE,fontWeight:700,fontSize:16}}>{u.balance||0} DH</div><div style={{color:"#ffffff40",fontSize:11}}>الرصيد</div></div>
           </div>
-        ))
-      )}
+        </div>
+      ))}
     </div>
   );
 }
 
-// ==================== BUY MODAL ====================
 function BuyModal({ item, user, onClose, onConfirm, showToast }) {
-  const [username, setUsername] = useState("");
-  const [load, setLoad] = useState(false);
-  const [succ, setSucc] = useState(false);
-  const [note, setNote] = useState("");
+  const [username,setUsername]=useState(""); const [load,setLoad]=useState(false);
+  const [succ,setSucc]=useState(false); const [note,setNote]=useState("");
+  const cat=services.find(s=>s.items.some(it=>it.id===item.id))?.category||"";
+  const isTikTok=cat==="TikTok";
 
-  const handle = async () => {
-    if (!username) return;
+  const handle=async()=>{
+    if(!username)return;
     setLoad(true);
-    try {
-      const cat = services.find(s=>s.items.some(it=>it.id===item.id))?.category || "";
-      const ref = await db.collection("orders").add({
-        uid: user.uid, name: user.name, email: user.email,
-        service: item.name, category: cat,
-        username, price: item.price, note,
-        status: "pending",
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      await db.collection("users").doc(user.uid).update({
-        points: firebase.firestore.FieldValue.increment(Math.floor(item.price / 2))
-      });
-      await sendTelegram(`🛒 *طلب جديد!*\n👤 ${user.name}\n✉️ ${user.email}\n🎮 ${item.name}\n📱 ${username}\n💰 ${item.price} DH\n📝 ${note||"لا توجد ملاحظات"}\n🆔 #${ref.id.slice(0,8).toUpperCase()}`);
-      setLoad(false); setSucc(true);
-      setTimeout(() => { onConfirm(); }, 1600);
-    } catch(e) { showToast("❌ فشل إرسال الطلب"); setLoad(false); }
+    try{
+      // حفظ الطلب في Firestore فقط (بدون Telegram)
+      await db.collection("orders").add({uid:user.uid,name:user.name,email:user.email,service:item.name,category:cat,username,price:item.price,note,status:"pending",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      await db.collection("users").doc(user.uid).update({points:firebase.firestore.FieldValue.increment(Math.floor(item.price/2))});
+      setLoad(false);setSucc(true);
+      setTimeout(()=>onConfirm(),1600);
+    }catch(e){showToast("❌ فشل إرسال الطلب");setLoad(false);}
   };
 
   return (
     <div style={{position:"fixed",inset:0,background:"#000000CC",display:"flex",alignItems:"flex-end",justifyContent:"center",zIndex:1000,backdropFilter:"blur(6px)"}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{background:CARD2,borderRadius:"26px 26px 0 0",padding:26,width:"100%",maxWidth:480,border:"1px solid #ffffff12",borderBottom:"none",animation:"slideUp 0.35s ease"}}>
         <div style={{width:40,height:4,background:"#ffffff20",borderRadius:2,margin:"0 auto 22px"}}/>
-        {succ ? (
+        {succ?(
           <div style={{textAlign:"center",padding:"28px 0"}}>
             <div style={{fontSize:60,animation:"float 1s ease"}}>✅</div>
             <div style={{color:GREEN,fontWeight:800,fontSize:20,marginTop:14}}>تم إرسال الطلب!</div>
             <div style={{color:"#ffffff50",fontSize:13,marginTop:6}}>سيتم التواصل معك قريباً</div>
             <div style={{color:ORANGE2,fontSize:13,marginTop:4}}>🏆 ربحت {Math.floor(item.price/2)} نقطة!</div>
           </div>
-        ) : (
-          <>
-            <div style={{textAlign:"center",marginBottom:20}}>
-              <div style={{width:60,height:60,borderRadius:16,fontSize:28,background:`${ORANGE}15`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px"}}>
-                {services.find(s=>s.items.some(it=>it.id===item.id))?.icon}
-              </div>
-              <div style={{color:"#fff",fontWeight:800,fontSize:17}}>{item.name}</div>
-              <Stars rating={item.rating}/>
+        ):(<>
+          <div style={{textAlign:"center",marginBottom:16}}>
+            <div style={{width:60,height:60,borderRadius:16,fontSize:28,background:`${ORANGE}15`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 10px"}}>{services.find(s=>s.items.some(it=>it.id===item.id))?.icon}</div>
+            <div style={{color:"#fff",fontWeight:800,fontSize:17}}>{item.name}</div>
+            <Stars rating={item.rating}/>
+          </div>
+          {isTikTok&&(
+            <div style={{background:"#EF444410",border:`1px solid ${RED}30`,borderRadius:14,padding:12,marginBottom:14}}>
+              <div style={{color:RED,fontWeight:700,fontSize:12,marginBottom:4}}>📌 تنبيه مهم</div>
+              <div style={{color:"#ffffff70",fontSize:12,lineHeight:1.6}}>شراء الحسابات يتم فقط عبر أدمن القروب لضمان حقوقك</div>
+              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" style={{display:"inline-block",marginTop:8,background:"linear-gradient(135deg,#25D366,#128C7E)",borderRadius:10,padding:"6px 14px",color:"#fff",fontWeight:700,fontSize:12,textDecoration:"none"}}>💬 تواصل مع الأدمن</a>
             </div>
-            <div style={{background:"#ffffff06",borderRadius:14,padding:14,marginBottom:16,display:"flex",justifyContent:"space-between"}}>
-              <span style={{color:"#ffffff60"}}>السعر</span>
-              <div>
-                <span style={{color:ORANGE,fontWeight:700,fontSize:18}}>{item.price} DH</span>
-                <span style={{color:GREEN,fontSize:12,marginRight:8}}>+{Math.floor(item.price/2)} نقطة</span>
-              </div>
-            </div>
-            {/* تنبيه القروب في المودال */}
-            <div style={{background:`${GREEN}08`,border:`1px solid ${GREEN}20`,borderRadius:12,padding:"10px 14px",marginBottom:14,fontSize:12,color:"#ffffff60"}}>
-              ⚠️ تأكد من التواصل مع <span style={{color:GREEN,fontWeight:700}}>أدمن القروب</span> لإتمام العملية بأمان
-            </div>
-            <div style={{marginBottom:14}}>
-              <div style={{color:"#ffffff60",fontSize:13,marginBottom:6}}>اسم المستخدم / ID الحساب *</div>
-              <input value={username} onChange={e=>setUsername(e.target.value)} placeholder="أدخل اسم المستخدم أو ID..."
-                style={{width:"100%",background:"#ffffff08",border:`1px solid ${username?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 14px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
-            </div>
-            <div style={{marginBottom:16}}>
-              <div style={{color:"#ffffff60",fontSize:13,marginBottom:6}}>ملاحظات إضافية (اختياري)</div>
-              <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="أي تفاصيل إضافية..." rows={2}
-                style={{width:"100%",background:"#ffffff08",border:"1px solid #ffffff15",borderRadius:14,padding:"12px 14px",color:"#fff",fontSize:13,resize:"none",outline:"none",boxSizing:"border-box"}}/>
-            </div>
-            <button onClick={handle} disabled={!username||load}
-              style={{width:"100%",background:!username?"#ffffff10":`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:18,padding:"16px",color:!username?"#ffffff30":"#fff",fontWeight:800,fontSize:15,cursor:!username?"default":"pointer",transition:"all 0.3s"}}>
-              {load ? <span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري...</span> : "✅ تأكيد الطلب"}
-            </button>
-          </>
-        )}
+          )}
+          <div style={{background:"#ffffff06",borderRadius:14,padding:14,marginBottom:14,display:"flex",justifyContent:"space-between"}}>
+            <span style={{color:"#ffffff60"}}>السعر</span>
+            <div><span style={{color:ORANGE,fontWeight:700,fontSize:18}}>{item.price} DH</span><span style={{color:GREEN,fontSize:12,marginRight:8}}>+{Math.floor(item.price/2)} نقطة</span></div>
+          </div>
+          <div style={{marginBottom:14}}>
+            <div style={{color:"#ffffff60",fontSize:13,marginBottom:6}}>اسم المستخدم / ID الحساب *</div>
+            <input value={username} onChange={e=>setUsername(e.target.value)} placeholder="أدخل اسم المستخدم أو ID..."
+              style={{width:"100%",background:"#ffffff08",border:`1px solid ${username?ORANGE+"40":"#ffffff15"}`,borderRadius:14,padding:"13px 14px",color:"#fff",fontSize:14,outline:"none",boxSizing:"border-box"}}/>
+          </div>
+          <div style={{marginBottom:16}}>
+            <div style={{color:"#ffffff60",fontSize:13,marginBottom:6}}>ملاحظات إضافية (اختياري)</div>
+            <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="أي تفاصيل إضافية..." rows={2}
+              style={{width:"100%",background:"#ffffff08",border:"1px solid #ffffff15",borderRadius:14,padding:"12px 14px",color:"#fff",fontSize:13,resize:"none",outline:"none",boxSizing:"border-box"}}/>
+          </div>
+          <button onClick={handle} disabled={!username||load}
+            style={{width:"100%",background:!username?"#ffffff10":`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:18,padding:"16px",color:!username?"#ffffff30":"#fff",fontWeight:800,fontSize:15,cursor:!username?"default":"pointer",transition:"all 0.3s"}}>
+            {load?<span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري...</span>:"✅ تأكيد الطلب"}
+          </button>
+        </>)}
       </div>
     </div>
   );
 }
 
-// ==================== NOTIFICATIONS ====================
 function NotifPanel({ user, onClose }) {
-  const [notifs, setNotifs] = useState([]);
-  const [loading, setLoad] = useState(true);
-
-  useEffect(() => {
-    if (!user?.uid) return;
-    const unsub = db.collection("notifications").where("uid","==",user.uid)
-      .orderBy("createdAt","desc").limit(20)
-      .onSnapshot(snap => { setNotifs(snap.docs.map(d=>({id:d.id,...d.data()}))); setLoad(false); }, ()=>setLoad(false));
-    return () => unsub();
-  }, [user]);
-
-  const markRead = async (id) => { await db.collection("notifications").doc(id).update({ read: true }); };
-
+  const [notifs,setNotifs]=useState([]); const [loading,setLoad]=useState(true);
+  useEffect(()=>{
+    if(!user?.uid)return;
+    const unsub=db.collection("notifications").where("uid","==",user.uid).orderBy("createdAt","desc").limit(20).onSnapshot(s=>{setNotifs(s.docs.map(d=>({id:d.id,...d.data()})));setLoad(false);},()=>setLoad(false));
+    return()=>unsub();
+  },[user]);
+  const markRead=async id=>{await db.collection("notifications").doc(id).update({read:true});};
   return (
     <div style={{position:"fixed",inset:0,background:"#000000AA",zIndex:500,backdropFilter:"blur(4px)"}} onClick={onClose}>
       <div onClick={e=>e.stopPropagation()} style={{position:"absolute",top:70,left:16,right:16,maxWidth:448,margin:"0 auto",background:CARD2,borderRadius:22,border:"1px solid #ffffff12",boxShadow:"0 20px 60px #000000AA",animation:"fadeDown 0.3s ease",maxHeight:"70vh",overflow:"hidden",display:"flex",flexDirection:"column"}}>
@@ -1143,19 +843,17 @@ function NotifPanel({ user, onClose }) {
           <button onClick={onClose} style={{background:"none",border:"none",color:"#ffffff50",fontSize:20,cursor:"pointer"}}>✕</button>
         </div>
         <div style={{overflowY:"auto",flex:1}}>
-          {loading ? (
-            <div style={{textAlign:"center",padding:"30px"}}><div style={{width:30,height:30,borderRadius:"50%",border:`2px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
-          ) : notifs.length === 0 ? (
-            <div style={{textAlign:"center",color:"#ffffff30",padding:"40px"}}><div style={{fontSize:40}}>🔕</div><div style={{marginTop:10}}>لا توجد إشعارات</div></div>
-          ) : notifs.map((n,i)=>(
+          {loading?<div style={{textAlign:"center",padding:"30px"}}><div style={{width:30,height:30,borderRadius:"50%",border:`2px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite",margin:"0 auto"}}/></div>
+          :notifs.length===0?<div style={{textAlign:"center",color:"#ffffff30",padding:"40px"}}><div style={{fontSize:40}}>🔕</div><div style={{marginTop:10}}>لا توجد إشعارات</div></div>
+          :notifs.map((n)=>(
             <div key={n.id} onClick={()=>markRead(n.id)} style={{padding:"14px 20px",borderBottom:"1px solid #ffffff06",display:"flex",gap:12,alignItems:"flex-start",background:n.read?"transparent":`${ORANGE}08`,cursor:"pointer"}}>
-              <div style={{width:40,height:40,borderRadius:12,background:n.read?"#ffffff08":`${ORANGE}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0,border:n.read?"none":`1px solid ${ORANGE}30`}}>{n.title?.split(" ")[0] || "📢"}</div>
+              <div style={{width:40,height:40,borderRadius:12,background:n.read?"#ffffff08":`${ORANGE}20`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,flexShrink:0}}>{n.title?.split(" ")[0]||"📢"}</div>
               <div style={{flex:1}}>
                 <div style={{color:n.read?"#ffffff80":"#fff",fontWeight:n.read?400:700,fontSize:14}}>{n.title}</div>
                 <div style={{color:"#ffffff50",fontSize:12,marginTop:3}}>{n.body}</div>
-                <div style={{color:"#ffffff30",fontSize:10,marginTop:4}}>{n.createdAt?.toDate?.()?.toLocaleString('ar') || ""}</div>
+                <div style={{color:"#ffffff30",fontSize:10,marginTop:4}}>{n.createdAt?.toDate?.()?.toLocaleString('ar')||""}</div>
               </div>
-              {!n.read && <div style={{width:8,height:8,borderRadius:"50%",background:ORANGE,flexShrink:0,marginTop:6,animation:"pulse 2s infinite"}}/>}
+              {!n.read&&<div style={{width:8,height:8,borderRadius:"50%",background:ORANGE,flexShrink:0,marginTop:6,animation:"pulse 2s infinite"}}/>}
             </div>
           ))}
         </div>
@@ -1164,141 +862,96 @@ function NotifPanel({ user, onClose }) {
   );
 }
 
-// ==================== MAIN APP ====================
 function App() {
-  const [splash, setSplash] = useState(true);
-  const [user, setUser] = useState(null);
-  const [authLoading, setAL] = useState(true);
-  const [tab, setTab] = useState("home");
-  const [balance, setBalance] = useState(0);
-  const [points, setPoints] = useState(0);
-  const [buyItem, setBuyItem] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [showNotif, setShowNotif] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const [splash,setSplash]=useState(true); const [user,setUser]=useState(null); const [authLoading,setAL]=useState(true);
+  const [tab,setTab]=useState("home"); const [balance,setBalance]=useState(0); const [points,setPoints]=useState(0);
+  const [buyItem,setBuyItem]=useState(null); const [toast,setToast]=useState(null);
+  const [showNotif,setShowNotif]=useState(false); const [unreadCount,setUnreadCount]=useState(0);
+  const isAdmin=user?.email===ADMIN_EMAIL;
+  const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(null),3500);};
 
-  const showToast = msg => { setToast(msg); setTimeout(()=>setToast(null),3500); };
-
-  useEffect(() => {
-    const unsub = auth.onAuthStateChanged(async fbUser => {
-      if (fbUser) {
-        try {
-          const snap = await db.collection("users").doc(fbUser.uid).get();
-          const data = snap.exists ? snap.data() : {};
-          setUser({ uid: fbUser.uid, name: data.name||fbUser.displayName||fbUser.email?.split("@")[0]||"مستخدم", email: fbUser.email||"", balance: data.balance||0, points: data.points||0 });
-          setBalance(data.balance||0);
-          setPoints(data.points||0);
-        } catch(e) {
-          setUser({ uid: fbUser.uid, name: fbUser.displayName||fbUser.email?.split("@")[0]||"مستخدم", email: fbUser.email||"", balance: 0, points: 0 });
-        }
-      } else { setUser(null); }
+  useEffect(()=>{
+    const unsub=auth.onAuthStateChanged(async fbUser=>{
+      if(fbUser){
+        try{
+          const snap=await db.collection("users").doc(fbUser.uid).get(); const data=snap.exists?snap.data():{};
+          setUser({uid:fbUser.uid,name:data.name||fbUser.displayName||fbUser.email?.split("@")[0]||"مستخدم",email:fbUser.email||"",balance:data.balance||0,points:data.points||0});
+          setBalance(data.balance||0);setPoints(data.points||0);
+        }catch(e){setUser({uid:fbUser.uid,name:fbUser.displayName||fbUser.email?.split("@")[0]||"مستخدم",email:fbUser.email||"",balance:0,points:0});}
+      }else setUser(null);
       setAL(false);
     });
-    return () => unsub();
-  }, []);
+    return()=>unsub();
+  },[]);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    const unsub = db.collection("notifications").where("uid","==",user.uid).where("read","==",false)
-      .onSnapshot(snap => setUnreadCount(snap.size), () => {});
-    return () => unsub();
-  }, [user]);
+  useEffect(()=>{
+    if(!user?.uid)return;
+    const unsub=db.collection("notifications").where("uid","==",user.uid).where("read","==",false).onSnapshot(s=>setUnreadCount(s.size),()=>{});
+    return()=>unsub();
+  },[user]);
 
-  const handleLogin = (userData) => {
-    setUser(userData); setBalance(userData.balance||0); setPoints(userData.points||0);
-    showToast(`🎉 أهلاً ${userData.name}!`);
-  };
+  const handleLogin=ud=>{setUser(ud);setBalance(ud.balance||0);setPoints(ud.points||0);showToast(`🎉 أهلاً ${ud.name}!`);};
+  const handleLogout=async()=>{await auth.signOut();setUser(null);setTab("home");showToast("👋 تم تسجيل الخروج");};
+  const handleConfirmBuy=()=>{setBuyItem(null);showToast("✅ تم إرسال طلبك! سيتم التواصل معك قريباً");setTab("orders");};
 
-  const handleLogout = async () => {
-    await auth.signOut(); setUser(null); setTab("home");
-    showToast("👋 تم تسجيل الخروج");
-  };
-
-  const handleConfirmBuy = () => {
-    setBuyItem(null);
-    showToast("✅ تم إرسال طلبك! سيصلك رد قريباً");
-    setTab("orders");
-  };
-
-  const tabs = [
-    {id:"home",    icon:"🏠", label:"الرئيسية"},
-    {id:"services",icon:"🛒", label:"الخدمات"},
-    {id:"orange",  icon:"🟠", label:"Orange"},
-    {id:"orders",  icon:"📦", label:"طلباتي"},
-    {id:"support", icon:"💬", label:"الدعم"},
-    ...(isAdmin ? [{id:"admin", icon:"⚙️", label:"الأدمن"}] : []),
+  const navTabs=[
+    {id:"home",icon:"🏠",label:"الرئيسية"},
+    {id:"services",icon:"🛒",label:"الخدمات"},
+    {id:"orange",icon:"🟠",label:"Orange"},
+    {id:"orders",icon:"📦",label:"طلباتي"},
+    {id:"support",icon:"🤖",label:"الدعم AI"},
+    {id:"profile",icon:"👤",label:"حسابي"},
   ];
 
-  if (splash) return <Splash onDone={()=>setSplash(false)}/>;
-  if (authLoading) return (
-    <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}>
-      <div style={{width:50,height:50,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite"}}/>
-      <div style={{color:"#ffffff40",fontSize:14}}>جاري التحقق...</div>
-    </div>
-  );
-  if (!user) return (
-    <>
-      <LoginScreen onLogin={handleLogin} showToast={showToast}/>
-      {toast && <div style={{position:"fixed",top:30,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,color:"#fff",borderRadius:18,padding:"13px 26px",fontWeight:700,fontSize:14,zIndex:9999,whiteSpace:"nowrap",animation:"toastIn 0.3s ease"}}>{toast}</div>}
-    </>
-  );
+  if(splash)return <Splash onDone={()=>setSplash(false)}/>;
+  if(authLoading)return <div style={{minHeight:"100vh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16}}><div style={{width:50,height:50,borderRadius:"50%",border:`3px solid ${ORANGE}30`,borderTopColor:ORANGE,animation:"spin 0.8s linear infinite"}}/><div style={{color:"#ffffff40",fontSize:14}}>جاري التحقق...</div></div>;
+  if(!user)return(<><LoginScreen onLogin={handleLogin} showToast={showToast}/>{toast&&<div style={{position:"fixed",top:30,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,color:"#fff",borderRadius:18,padding:"13px 26px",fontWeight:700,fontSize:14,zIndex:9999,whiteSpace:"nowrap",animation:"toastIn 0.3s ease"}}>{toast}</div>}</>);
 
   return (
     <div style={{background:BG,minHeight:"100vh",maxWidth:480,margin:"0 auto",position:"relative",paddingBottom:90}}>
-      {/* Header */}
       <div style={{background:`${BG}F0`,backdropFilter:"blur(16px)",padding:"14px 18px 10px",position:"sticky",top:0,zIndex:100,borderBottom:"1px solid #ffffff08"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div style={{fontWeight:900,fontSize:20,letterSpacing:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE2})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>⚡ FAST STORE</div>
           <div style={{display:"flex",gap:8,alignItems:"center"}}>
-            <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:20,padding:"5px 12px",color:ORANGE,fontSize:13,fontWeight:700}}>
-              🟠 <Counter value={balance}/> DH
-            </div>
+            <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:20,padding:"5px 12px",color:ORANGE,fontSize:13,fontWeight:700}}>🟠 <Counter value={balance}/> DH</div>
             <div onClick={()=>setShowNotif(!showNotif)} style={{width:36,height:36,borderRadius:10,background:CARD,border:`1px solid ${unreadCount>0?ORANGE+"50":"#ffffff0A"}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18,position:"relative"}}>
               🔔
-              {unreadCount > 0 && <div style={{position:"absolute",top:-4,left:-4,width:18,height:18,borderRadius:"50%",background:RED,color:"#fff",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",animation:"notifPop 0.3s ease"}}>{unreadCount}</div>}
+              {unreadCount>0&&<div style={{position:"absolute",top:-4,left:-4,width:18,height:18,borderRadius:"50%",background:RED,color:"#fff",fontSize:10,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",animation:"notifPop 0.3s ease"}}>{unreadCount}</div>}
             </div>
-            {isAdmin && <div onClick={()=>setTab("admin")} style={{width:36,height:36,borderRadius:10,background:tab==="admin"?`${ORANGE}20`:CARD,border:`1px solid ${tab==="admin"?ORANGE+"40":"#ffffff0A"}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18}}>⚙️</div>}
+            {isAdmin&&<div onClick={()=>setTab("admin")} style={{width:36,height:36,borderRadius:10,background:tab==="admin"?`${ORANGE}20`:CARD,border:`1px solid ${tab==="admin"?ORANGE+"40":"#ffffff0A"}`,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:18}}>⚙️</div>}
           </div>
         </div>
       </div>
 
-      {/* المحتوى */}
       <div style={{paddingTop:14}}>
-        {tab==="home"     && <HomeTab user={user} balance={balance} points={points} onBuy={setBuyItem} setTab={setTab}/>}
-        {tab==="services" && <ServicesTab onBuy={setBuyItem}/>}
-        {tab==="orange"   && <OrangeTab user={user} balance={balance} setBalance={setBalance} showToast={showToast}/>}
-        {tab==="orders"   && <OrdersTab user={user}/>}
-        {tab==="support"  && <SupportTab user={user} showToast={showToast}/>}
-        {tab==="profile"  && <ProfileTab user={user} balance={balance} points={points} setTab={setTab} onLogout={handleLogout} showToast={showToast}/>}
-        {tab==="admin" && isAdmin && <AdminTab user={user} showToast={showToast}/>}
+        {tab==="home"&&<HomeTab user={user} balance={balance} points={points} onBuy={setBuyItem} setTab={setTab}/>}
+        {tab==="services"&&<ServicesTab onBuy={setBuyItem}/>}
+        {tab==="orange"&&<OrangeTab user={user} balance={balance} setBalance={setBalance} showToast={showToast}/>}
+        {tab==="orders"&&<OrdersTab user={user}/>}
+        {tab==="support"&&<SupportTab user={user} showToast={showToast}/>}
+        {tab==="profile"&&<ProfileTab user={user} balance={balance} points={points} setTab={setTab} onLogout={handleLogout} showToast={showToast}/>}
+        {tab==="admin"&&isAdmin&&<AdminTab user={user} showToast={showToast}/>}
       </div>
 
-      {/* Bottom Nav */}
       <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,background:`${CARD2}F8`,backdropFilter:"blur(20px)",borderTop:"1px solid #ffffff0A",padding:"8px 4px 16px",zIndex:200}}>
         <div style={{display:"flex",justifyContent:"space-around"}}>
-          {tabs.filter(t=>t.id!=="admin").map(t=>{
+          {navTabs.map(t=>{
             const active=tab===t.id;
             return (
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"0 4px"}}>
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3,padding:"0 2px"}}>
                 <div style={{width:42,height:42,borderRadius:13,background:active?`${ORANGE}20`:"transparent",border:active?`1px solid ${ORANGE}40`:"1px solid transparent",display:"flex",alignItems:"center",justifyContent:"center",fontSize:19,transition:"all 0.25s",boxShadow:active?`0 0 15px ${ORANGE}30`:"none",transform:active?"scale(1.1)":"scale(1)"}}>
                   {t.icon}
                 </div>
-                <div style={{fontSize:10,fontWeight:active?700:400,color:active?ORANGE:"#ffffff35",transition:"all 0.25s"}}>{t.label}</div>
+                <div style={{fontSize:9,fontWeight:active?700:400,color:active?ORANGE:"#ffffff35",transition:"all 0.25s"}}>{t.label}</div>
               </button>
             );
           })}
         </div>
       </div>
 
-      {showNotif && <NotifPanel user={user} onClose={()=>setShowNotif(false)}/>}
-      {buyItem && <BuyModal item={buyItem} user={user} onClose={()=>setBuyItem(null)} onConfirm={handleConfirmBuy} showToast={showToast}/>}
-
-      {toast && (
-        <div style={{position:"fixed",top:78,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,color:"#fff",borderRadius:18,padding:"12px 24px",fontWeight:700,fontSize:14,zIndex:999,whiteSpace:"nowrap",boxShadow:`0 8px 30px ${ORANGE}40`,animation:"toastIn 0.3s ease"}}>
-          {toast}
-        </div>
-      )}
+      {showNotif&&<NotifPanel user={user} onClose={()=>setShowNotif(false)}/>}
+      {buyItem&&<BuyModal item={buyItem} user={user} onClose={()=>setBuyItem(null)} onConfirm={handleConfirmBuy} showToast={showToast}/>}
+      {toast&&<div style={{position:"fixed",top:78,left:"50%",transform:"translateX(-50%)",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,color:"#fff",borderRadius:18,padding:"12px 24px",fontWeight:700,fontSize:14,zIndex:999,whiteSpace:"nowrap",boxShadow:`0 8px 30px ${ORANGE}40`,animation:"toastIn 0.3s ease"}}>{toast}</div>}
     </div>
   );
 }
