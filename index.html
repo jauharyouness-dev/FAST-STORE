@@ -12,7 +12,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { background:#0A0A0F; font-family:'Segoe UI',Tahoma,sans-serif; direction:rtl; }
+html, body { height:100%; }
+body { background:#0A0A0F; font-family:'Segoe UI',Tahoma,sans-serif; direction:rtl; overscroll-behavior:none; }
 ::-webkit-scrollbar { width:4px; }
 ::-webkit-scrollbar-track { background:#0A0A0F; }
 ::-webkit-scrollbar-thumb { background:#FF6B0040; border-radius:2px; }
@@ -51,13 +52,34 @@ const TG_CHAT_ID = "8038053852";
 const ADMIN_EMAIL = "younesd.55yyy5@gmail.com";
 
 async function sendTelegram(message) {
-  try {
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: TG_CHAT_ID, text: message, parse_mode: "Markdown" })
-    });
-  } catch(e) {}
+  // إزالة رموز Markdown لتفادي أخطاء التنسيق
+  const plainMsg = message.replace(/[*_`\[\]]/g, "");
+  
+  const attempts = [
+    { text: plainMsg, parse_mode: "" },
+  ];
+  
+  for (const attempt of attempts) {
+    try {
+      const body = { chat_id: TG_CHAT_ID, text: attempt.text };
+      if (attempt.parse_mode) body.parse_mode = attempt.parse_mode;
+      
+      const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      if (json.ok) {
+        console.log("Telegram OK:", json.result.message_id);
+        return;
+      } else {
+        console.error("Telegram error:", json.description);
+      }
+    } catch(e) {
+      console.error("Telegram fetch error:", e.message);
+    }
+  }
 }
 </script>
 <script type="text/babel">
@@ -629,7 +651,7 @@ function OrangeTab({ user, balance, setBalance, showToast }) {
         code: raw, plan_dh: plan.dh,
         status: "pending", createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      await sendTelegram(`🟠 *كود Orange جديد!*\n👤 ${user.name}\n✉️ ${user.email}\n🔢 \`${raw}\`\n💰 ${plan.dh} DH`);
+      await sendTelegram(`🟠 كود Orange جديد!\n👤 ${user.name}\n✉️ ${user.email}\n🔢 ${raw}\n💰 ${plan.dh} DH`);
       setBalance(newBalance);
       setStep(4);
       showToast(`🏆 ربحت ${pointsEarned} نقطة!`);
@@ -806,6 +828,13 @@ function SupportTab({ user, showToast }) {
   const [loading, setLoad] = useState(true);
   const [sending, setSend] = useState(false);
   const endRef = useRef(null);
+  const [winH, setWinH] = useState(window.innerHeight);
+
+  useEffect(() => {
+    const onResize = () => setWinH(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -834,11 +863,14 @@ function SupportTab({ user, showToast }) {
     setSend(false);
   };
 
+  // حساب الارتفاع الديناميكي: ارتفاع الشاشة - شريط التنقل (80px) - هيدر التطبيق (60px) - padding
+  const chatH = winH - 80 - 60 - 16;
+
   return (
-    <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease",display:"flex",flexDirection:"column",height:"calc(100vh - 160px)"}}>
+    <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease",display:"flex",flexDirection:"column",height:chatH}}>
       <div style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:4}}>💬 الدعم الفني</div>
       <div style={{color:"#ffffff50",fontSize:13,marginBottom:14}}>فريقنا متاح 24/7 لمساعدتك</div>
-      <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
+      <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8,minHeight:0}}>
         <div style={{background:`${ORANGE}15`,border:`1px solid ${ORANGE}30`,borderRadius:18,borderBottomLeftRadius:4,padding:14,maxWidth:"80%"}}>
           <div style={{color:"#ffffff80",fontSize:11,marginBottom:6}}>⚡ FAST STORE Bot</div>
           <div style={{color:"#fff",fontSize:14}}>أهلاً {user.name}! كيف يمكننا مساعدتك اليوم؟ 😊</div>
@@ -1245,7 +1277,7 @@ function App() {
   );
 
   return (
-    <div style={{background:BG,minHeight:"100vh",maxWidth:480,margin:"0 auto",position:"relative",paddingBottom:90}}>
+    <div style={{background:BG,minHeight:"100vh",maxWidth:480,margin:"0 auto",position:"relative",paddingBottom:90,display:"flex",flexDirection:"column"}}>
       {/* Header */}
       <div style={{background:`${BG}F0`,backdropFilter:"blur(16px)",padding:"14px 18px 10px",position:"sticky",top:0,zIndex:100,borderBottom:"1px solid #ffffff08"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
@@ -1264,7 +1296,7 @@ function App() {
       </div>
 
       {/* المحتوى */}
-      <div style={{paddingTop:14}}>
+      <div style={{paddingTop:14,minHeight:"calc(100vh - 160px)"}}>
         {tab==="home"     && <HomeTab user={user} balance={balance} points={points} onBuy={setBuyItem} setTab={setTab}/>}
         {tab==="services" && <ServicesTab onBuy={setBuyItem}/>}
         {tab==="orange"   && <OrangeTab user={user} balance={balance} setBalance={setBalance} showToast={showToast}/>}
