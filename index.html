@@ -52,20 +52,13 @@ const TG_CHAT_ID = "8038053852";
 const ADMIN_EMAIL = "younesd.55yyy5@gmail.com";
 
 // ==================== UltraMsg WhatsApp ====================
-const ULTRA_INSTANCE = "instance162945";
-const ULTRA_TOKEN = "09uj8nqnmpvvubq1";
-const ADMIN_WHATSAPP = "9647751235150"; // رقم الأدمن
-
+// ✅ يستخدم Vercel API لتجاوز مشكلة CORS
 async function sendWhatsApp(message) {
   try {
-    const res = await fetch(`https://api.ultramsg.com/${ULTRA_INSTANCE}/messages/chat`, {
+    const res = await fetch('/api/send-whatsapp', {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token: ULTRA_TOKEN,
-        to: ADMIN_WHATSAPP,
-        body: message
-      })
+      body: JSON.stringify({ message })
     });
     const data = await res.json();
     return data;
