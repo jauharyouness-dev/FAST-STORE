@@ -51,7 +51,30 @@ const TG_TOKEN = "8390349160:AAGlePL2KGPU4nmtR7XackUOsyQY50XqAC0";
 const TG_CHAT_ID = "8038053852";
 const ADMIN_EMAIL = "younesd.55yyy5@gmail.com";
 
-// إرسال فقط لإشعارات الأدمن (ليس الطلبات)
+// ==================== UltraMsg WhatsApp ====================
+const ULTRA_INSTANCE = "instance162945";
+const ULTRA_TOKEN = "09uj8nqnmpvvubq1";
+const ADMIN_WHATSAPP = "9647751235150"; // رقم الأدمن
+
+async function sendWhatsApp(message) {
+  try {
+    const res = await fetch(`https://api.ultramsg.com/${ULTRA_INSTANCE}/messages/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token: ULTRA_TOKEN,
+        to: ADMIN_WHATSAPP,
+        body: message
+      })
+    });
+    const data = await res.json();
+    return data;
+  } catch(e) {
+    console.error("WhatsApp send error:", e);
+  }
+}
+// ===========================================================
+
 async function sendTelegram(message) {
   try {
     await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
@@ -62,7 +85,6 @@ async function sendTelegram(message) {
   } catch(e) {}
 }
 
-// دالة AI للدعم
 async function askAI(messages) {
   try {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
@@ -300,7 +322,6 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
-      {/* بطاقة الرصيد */}
       <div style={{background:`linear-gradient(135deg,#1A1200,#2A1A00)`,border:`1px solid ${ORANGE}30`,borderRadius:22,padding:22,marginBottom:14,position:"relative",overflow:"hidden"}}>
         <div style={{position:"absolute",top:-40,right:-40,width:160,height:160,borderRadius:"50%",background:`${ORANGE}10`,filter:"blur(40px)"}}/>
         <div style={{color:"#ffffff50",fontSize:12,marginBottom:4}}>👋 أهلاً، {user.name}</div>
@@ -320,7 +341,6 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         </div>
       </div>
 
-      {/* تنبيه مهم */}
       <div style={{background:"#EF444410",border:`1px solid ${RED}30`,borderRadius:18,padding:16,marginBottom:14}}>
         <div style={{color:RED,fontWeight:800,fontSize:14,marginBottom:6}}>📌 تنبيه مهم</div>
         <div style={{color:"#ffffff80",fontSize:13,lineHeight:1.7}}>أي تبادل حسابات أو عملية شراء تكون <span style={{color:"#fff",fontWeight:700}}>فقط عبر أدمن القروب</span> لتفادي أي نصب.</div>
@@ -332,7 +352,6 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         </div>
       </div>
 
-      {/* كوبون */}
       <div style={{background:CARD,borderRadius:18,padding:16,marginBottom:14,border:"1px solid #ffffff0A"}}>
         <div style={{color:"#fff",fontWeight:700,fontSize:14,marginBottom:10}}>🎁 كوبون خصم</div>
         <div style={{display:"flex",gap:8}}>
@@ -344,14 +363,12 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         <div style={{color:"#ffffff30",fontSize:11,marginTop:8}}>💡 جرب: FAST10 • WELCOME • VIP50</div>
       </div>
 
-      {/* بانر Orange */}
       <div onClick={()=>setTab("orange")} style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}30`,borderRadius:18,padding:16,marginBottom:14,cursor:"pointer",display:"flex",alignItems:"center",gap:14}}>
         <div style={{fontSize:40}}>🟠</div>
         <div style={{flex:1}}><div style={{color:ORANGE,fontWeight:800,fontSize:15}}>شحن رصيد بـ Orange Money</div><div style={{color:"#ffffff60",fontSize:12,marginTop:3}}>أدخل كود التعبئة واحصل على رصيدك فوراً</div></div>
         <div style={{color:ORANGE,fontSize:22}}>‹</div>
       </div>
 
-      {/* خدمات مميزة */}
       <div style={{color:"#fff",fontWeight:700,fontSize:16,marginBottom:10}}>🔥 خدمات مميزة</div>
       {featured.map((item,i)=>(
         <div key={item.id} style={{background:CARD,borderRadius:18,padding:14,marginBottom:10,border:"1px solid #ffffff0A",display:"flex",alignItems:"center",gap:12,animation:`fadeIn 0.4s ease ${i*0.1}s both`}}>
@@ -367,7 +384,6 @@ function HomeTab({ user, balance, points, onBuy, setTab }) {
         </div>
       ))}
 
-      {/* عرض اليوم */}
       <div style={{background:`${ORANGE}10`,border:`1px solid ${ORANGE}30`,borderRadius:18,padding:16}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
           <div><div style={{color:ORANGE,fontWeight:800,fontSize:15}}>🎉 عرض اليوم!</div><div style={{color:"#fff",fontSize:13,marginTop:6,lineHeight:1.6}}>اشحن 50 DH واحصل على<br/><span style={{color:ORANGE2,fontWeight:700}}>5 DH هدية مجاناً</span></div></div>
@@ -389,7 +405,6 @@ function ServicesTab({ onBuy }) {
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease"}}>
       <div style={{color:"#fff",fontWeight:700,fontSize:18,marginBottom:12}}>🛒 الخدمات</div>
 
-      {/* تنبيه TikTok */}
       {services[sel].category==="TikTok"&&(
         <div style={{background:"#EF444410",border:`1px solid ${RED}30`,borderRadius:14,padding:14,marginBottom:12}}>
           <div style={{color:RED,fontWeight:700,fontSize:13,marginBottom:4}}>📌 تنبيه – حسابات TikTok</div>
@@ -546,14 +561,12 @@ function OrdersTab({ user }) {
   );
 }
 
-// ==================== دعم AI ====================
 function SupportTab({ user, showToast }) {
   const [msgs, setMsgs] = useState([]);
   const [text, setText] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const endRef = useRef(null);
 
-  // رسائل ترحيب افتراضية
   const welcomeMsgs = [
     { id:"w1", from:"ai", text:`أهلاً ${user.name}! 👋 أنا مساعد FAST STORE الذكي.\nكيف يمكنني مساعدتك اليوم؟`, time: new Date() },
   ];
@@ -568,7 +581,6 @@ function SupportTab({ user, showToast }) {
     setText("");
     setAiLoading(true);
 
-    // بناء تاريخ المحادثة للـ AI
     const history = newMsgs.map(m=>({ role: m.from==="user"?"user":"assistant", content: m.text }));
 
     try {
@@ -585,7 +597,6 @@ function SupportTab({ user, showToast }) {
 
   return (
     <div style={{padding:"0 16px 16px",animation:"fadeIn 0.4s ease",display:"flex",flexDirection:"column",height:"calc(100vh - 160px)"}}>
-      {/* Header */}
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12,background:CARD,borderRadius:16,padding:"12px 14px",border:"1px solid #ffffff0A"}}>
         <div style={{width:42,height:42,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:20,flexShrink:0,animation:"glow 3s ease-in-out infinite"}}>🤖</div>
         <div style={{flex:1}}>
@@ -598,7 +609,6 @@ function SupportTab({ user, showToast }) {
         <div style={{background:`${ORANGE}15`,borderRadius:10,padding:"4px 10px",fontSize:11,color:ORANGE,fontWeight:700}}>AI ⚡</div>
       </div>
 
-      {/* روابط سريعة */}
       <div style={{display:"flex",gap:8,marginBottom:10}}>
         <a href={WA_LINK} target="_blank" rel="noopener noreferrer"
           style={{flex:1,background:"linear-gradient(135deg,#25D366,#128C7E)",borderRadius:12,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>💬 WhatsApp</a>
@@ -606,7 +616,6 @@ function SupportTab({ user, showToast }) {
           style={{flex:1,background:"linear-gradient(135deg,#E1306C,#F77737)",borderRadius:12,padding:"8px",color:"#fff",fontWeight:700,fontSize:12,textAlign:"center",textDecoration:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>📸 Instagram</a>
       </div>
 
-      {/* المحادثة */}
       <div style={{flex:1,overflowY:"auto",display:"flex",flexDirection:"column",gap:10,paddingBottom:8}}>
         {allMsgs.map((m,i)=>(
           <div key={m.id} style={{alignSelf:m.from==="user"?"flex-end":"flex-start",maxWidth:"82%",animation:`fadeIn 0.3s ease ${i*0.03}s both`}}>
@@ -618,7 +627,6 @@ function SupportTab({ user, showToast }) {
           </div>
         ))}
 
-        {/* مؤشر الكتابة */}
         {aiLoading&&(
           <div style={{alignSelf:"flex-start",maxWidth:"82%"}}>
             <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}><div style={{width:22,height:22,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE},${ORANGE2})`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12}}>🤖</div><span style={{color:"#ffffff50",fontSize:11}}>يكتب...</span></div>
@@ -628,7 +636,6 @@ function SupportTab({ user, showToast }) {
           </div>
         )}
 
-        {/* أسئلة سريعة */}
         {msgs.length===0&&!aiLoading&&(
           <div style={{marginTop:8}}>
             <div style={{color:"#ffffff40",fontSize:12,marginBottom:8,textAlign:"center"}}>اسأل مباشرة أو اختر سؤالاً:</div>
@@ -644,7 +651,6 @@ function SupportTab({ user, showToast }) {
         <div ref={endRef}/>
       </div>
 
-      {/* حقل الكتابة */}
       <div style={{display:"flex",gap:10,marginTop:10}}>
         <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="اكتب سؤالك هنا..." rows={2}
           onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
@@ -761,6 +767,7 @@ function AdminTab({ user, showToast }) {
   );
 }
 
+// ==================== BuyModal مع إرسال WhatsApp ====================
 function BuyModal({ item, user, onClose, onConfirm, showToast }) {
   const [username,setUsername]=useState(""); const [load,setLoad]=useState(false);
   const [succ,setSucc]=useState(false); const [note,setNote]=useState("");
@@ -771,12 +778,51 @@ function BuyModal({ item, user, onClose, onConfirm, showToast }) {
     if(!username)return;
     setLoad(true);
     try{
-      // حفظ الطلب في Firestore فقط (بدون Telegram)
-      await db.collection("orders").add({uid:user.uid,name:user.name,email:user.email,service:item.name,category:cat,username,price:item.price,note,status:"pending",createdAt:firebase.firestore.FieldValue.serverTimestamp()});
-      await db.collection("users").doc(user.uid).update({points:firebase.firestore.FieldValue.increment(Math.floor(item.price/2))});
-      setLoad(false);setSucc(true);
-      setTimeout(()=>onConfirm(),1600);
-    }catch(e){showToast("❌ فشل إرسال الطلب");setLoad(false);}
+      // ✅ حفظ الطلب في Firestore
+      const orderRef = await db.collection("orders").add({
+        uid:user.uid,
+        name:user.name,
+        email:user.email,
+        service:item.name,
+        category:cat,
+        username,
+        price:item.price,
+        note,
+        status:"pending",
+        createdAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      // ✅ إضافة نقاط للمستخدم
+      await db.collection("users").doc(user.uid).update({
+        points:firebase.firestore.FieldValue.increment(Math.floor(item.price/2))
+      });
+
+      // ✅ إرسال إشعار واتساب مباشرة للأدمن
+      const now = new Date().toLocaleString('ar-IQ');
+      const waMessage =
+        `🛒 *طلب جديد - FAST STORE ⚡*\n` +
+        `━━━━━━━━━━━━━━━━━━\n` +
+        `📦 *الخدمة:* ${item.name}\n` +
+        `📱 *المنصة:* ${cat}\n` +
+        `👤 *اسم العميل:* ${user.name}\n` +
+        `✉️ *البريد:* ${user.email}\n` +
+        `🔑 *حساب العميل:* ${username}\n` +
+        `💰 *السعر:* ${item.price} DH\n` +
+        (note ? `📝 *ملاحظات:* ${note}\n` : ``) +
+        `🆔 *رقم الطلب:* #${orderRef.id.slice(0,8).toUpperCase()}\n` +
+        `🕒 *التاريخ:* ${now}\n` +
+        `━━━━━━━━━━━━━━━━━━`;
+
+      await sendWhatsApp(waMessage);
+
+      setLoad(false);
+      setSucc(true);
+      setTimeout(()=>onConfirm(),1800);
+    }catch(e){
+      console.error(e);
+      showToast("❌ فشل إرسال الطلب");
+      setLoad(false);
+    }
   };
 
   return (
@@ -787,7 +833,7 @@ function BuyModal({ item, user, onClose, onConfirm, showToast }) {
           <div style={{textAlign:"center",padding:"28px 0"}}>
             <div style={{fontSize:60,animation:"float 1s ease"}}>✅</div>
             <div style={{color:GREEN,fontWeight:800,fontSize:20,marginTop:14}}>تم إرسال الطلب!</div>
-            <div style={{color:"#ffffff50",fontSize:13,marginTop:6}}>سيتم التواصل معك قريباً</div>
+            <div style={{color:"#ffffff50",fontSize:13,marginTop:6}}>📲 تم إرسال تفاصيل طلبك للأدمن عبر واتساب</div>
             <div style={{color:ORANGE2,fontSize:13,marginTop:4}}>🏆 ربحت {Math.floor(item.price/2)} نقطة!</div>
           </div>
         ):(<>
@@ -807,6 +853,13 @@ function BuyModal({ item, user, onClose, onConfirm, showToast }) {
             <span style={{color:"#ffffff60"}}>السعر</span>
             <div><span style={{color:ORANGE,fontWeight:700,fontSize:18}}>{item.price} DH</span><span style={{color:GREEN,fontSize:12,marginRight:8}}>+{Math.floor(item.price/2)} نقطة</span></div>
           </div>
+
+          {/* بانر إشعار واتساب */}
+          <div style={{background:"#25D36615",border:"1px solid #25D36640",borderRadius:12,padding:"10px 14px",marginBottom:14,display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:18}}>💬</span>
+            <div style={{color:"#25D366",fontSize:12,fontWeight:600}}>سيصلك إشعار تأكيد الطلب على واتساب الأدمن فور الإرسال</div>
+          </div>
+
           <div style={{marginBottom:14}}>
             <div style={{color:"#ffffff60",fontSize:13,marginBottom:6}}>اسم المستخدم / ID الحساب *</div>
             <input value={username} onChange={e=>setUsername(e.target.value)} placeholder="أدخل اسم المستخدم أو ID..."
@@ -819,7 +872,7 @@ function BuyModal({ item, user, onClose, onConfirm, showToast }) {
           </div>
           <button onClick={handle} disabled={!username||load}
             style={{width:"100%",background:!username?"#ffffff10":`linear-gradient(135deg,${ORANGE},${ORANGE2})`,border:"none",borderRadius:18,padding:"16px",color:!username?"#ffffff30":"#fff",fontWeight:800,fontSize:15,cursor:!username?"default":"pointer",transition:"all 0.3s"}}>
-            {load?<span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري...</span>:"✅ تأكيد الطلب"}
+            {load?<span style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8}}><span style={{width:18,height:18,borderRadius:"50%",border:"2px solid #ffffff40",borderTopColor:"#fff",display:"inline-block",animation:"spin 0.8s linear infinite"}}/>جاري الإرسال...</span>:"✅ تأكيد الطلب 💬"}
           </button>
         </>)}
       </div>
@@ -892,7 +945,7 @@ function App() {
 
   const handleLogin=ud=>{setUser(ud);setBalance(ud.balance||0);setPoints(ud.points||0);showToast(`🎉 أهلاً ${ud.name}!`);};
   const handleLogout=async()=>{await auth.signOut();setUser(null);setTab("home");showToast("👋 تم تسجيل الخروج");};
-  const handleConfirmBuy=()=>{setBuyItem(null);showToast("✅ تم إرسال طلبك! سيتم التواصل معك قريباً");setTab("orders");};
+  const handleConfirmBuy=()=>{setBuyItem(null);showToast("✅ تم إرسال طلبك للأدمن عبر واتساب! 💬");setTab("orders");};
 
   const navTabs=[
     {id:"home",icon:"🏠",label:"الرئيسية"},
