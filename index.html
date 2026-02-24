@@ -806,7 +806,8 @@ function BuyModal({ item, user, onClose, onConfirm, showToast }) {
         `🕒 *التاريخ:* ${now}\n` +
         `━━━━━━━━━━━━━━━━━━`;
 
-      await sendWhatsApp(waMessage);
+      // إرسال واتساب بدون انتظار
+      sendWhatsApp(waMessage).catch(e => console.log("WA:", e));
 
       setLoad(false);
       setSucc(true);
