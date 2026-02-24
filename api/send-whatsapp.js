@@ -8,8 +8,11 @@ export default async function handler(req, res) {
 
   const { message } = req.body;
 
+  const results = {};
+
+  // ✅ إرسال واتساب عبر UltraMsg
   try {
-    const response = await fetch('https://api.ultramsg.com/instance162945/messages/chat', {
+    const waRes = await fetch('https://api.ultramsg.com/instance162945/messages/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -18,9 +21,28 @@ export default async function handler(req, res) {
         body: message
       })
     });
-    const data = await response.json();
-    return res.status(200).json({ success: true, data });
+    results.whatsapp = await waRes.json();
   } catch (e) {
-    return res.status(500).json({ success: false, error: e.message });
+    results.whatsapp = { error: e.message };
   }
+
+  // ✅ إرسال تيليغرام
+  try {
+    const TG_TOKEN = '8390349160:AAGlePL2KGPU4nmtR7XackUOsyQY50XqAC0';
+    const TG_CHAT_ID = '8038053852';
+    const tgRes = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TG_CHAT_ID,
+        text: message,
+        parse_mode: 'Markdown'
+      })
+    });
+    results.telegram = await tgRes.json();
+  } catch (e) {
+    results.telegram = { error: e.message };
+  }
+
+  return res.status(200).json({ success: true, results });
 }
