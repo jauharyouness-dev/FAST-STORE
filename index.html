@@ -14,6 +14,21 @@
 <meta name="google-site-verification" content="1p7UHLTuXe-YsRNMVe9eeUyaGDpw1ijYCQ6SsDaf0is">
 <link rel="canonical" href="https://pes-market.vercel.app/">
 
+<!-- ═══ PWA ═══ -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PES Market">
+<link rel="manifest" href="data:application/json,{
+  %22name%22:%22PES Accounts Market%22,
+  %22short_name%22:%22PES Market%22,
+  %22start_url%22:%22/%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%23080c14%22,
+  %22theme_color%22:%22%2300d4ff%22,
+  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2300d4ff'/%3E%3Ctext y='.9em' font-size='75' font-weight='900' font-family='Arial' fill='black' x='12'%3EP%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22192x192%22,%22type%22:%22image/svg+xml%22}]
+}">
+
 <!-- ═══ OPEN GRAPH (واتساب، فيسبوك، تيليغرام) ═══ -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pes-market.vercel.app/">
@@ -1547,9 +1562,63 @@ footer {
   .nav-mobile-toggle { display: block; }
 }
 
-/* ═══════════════════════════════════════
-   SOLD TICKER STRIP
-═══════════════════════════════════════ */
+/* ═══ PWA INSTALL BANNER ═══ */
+#pwa-banner {
+  position: fixed;
+  bottom: 80px;
+  left: 12px; right: 12px;
+  z-index: 1600;
+  background: linear-gradient(135deg, #0d1525, #1a2540);
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  padding: 16px 18px;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), var(--glow);
+  animation: slideUp 0.4s cubic-bezier(0.4,0,0.2,1);
+  max-width: 480px;
+  margin: 0 auto;
+}
+@media (min-width: 640px) { #pwa-banner { left: 50%; right: auto; transform: translateX(-50%); width: 420px; bottom: 24px; } }
+#pwa-banner.show { display: flex; }
+.pwa-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), #0060ff);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; font-weight: 900; color: #000;
+  font-family: var(--font-en);
+  flex-shrink: 0;
+  box-shadow: 0 0 16px rgba(0,212,255,0.4);
+}
+.pwa-text { flex: 1; }
+.pwa-text strong { display: block; font-size: 14px; font-weight: 800; margin-bottom: 2px; }
+.pwa-text span { font-size: 12px; color: var(--text-muted); }
+.pwa-actions { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
+.pwa-install-btn {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, var(--accent), #0060ff);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-ar);
+  white-space: nowrap;
+}
+.pwa-dismiss-btn {
+  padding: 6px 16px;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font-ar);
+  text-align: center;
+}
 #sold-ticker {
   background: linear-gradient(90deg, rgba(0,230,118,0.08), rgba(0,212,255,0.08), rgba(0,230,118,0.08));
   border-bottom: 1px solid rgba(0,230,118,0.2);
@@ -2535,6 +2604,19 @@ footer {
         <i class="fas fa-save"></i> حفظ
       </button>
     </div>
+  </div>
+</div>
+
+<!-- ─── PWA INSTALL BANNER ─── -->
+<div id="pwa-banner">
+  <div class="pwa-icon">P</div>
+  <div class="pwa-text">
+    <strong>ثبّت PES Market</strong>
+    <span>أضفه للشاشة الرئيسية للوصول السريع</span>
+  </div>
+  <div class="pwa-actions">
+    <button class="pwa-install-btn" onclick="installPWA()">تثبيت</button>
+    <button class="pwa-dismiss-btn" onclick="dismissPWA()">لاحقاً</button>
   </div>
 </div>
 
@@ -3648,6 +3730,8 @@ window.switchService      = switchService;
 window.openSocialOrder    = openSocialOrder;
 window.closeSocialOrder   = closeSocialOrder;
 window.confirmSocialOrder = confirmSocialOrder;
+window.installPWA         = installPWA;
+window.dismissPWA         = dismissPWA;
 window.toggleTheme        = toggleTheme;
 window.openCustomRequest   = openCustomRequest;
 window.closeCustomRequest  = closeCustomRequest;
@@ -3804,6 +3888,38 @@ function confirmSocialOrder() {
   closeSocialOrder();
   showToast('✅ جاري فتح واتساب...', 'success');
 }
+
+// ────────────── PWA INSTALL ──────────────
+let _pwaPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  _pwaPrompt = e;
+  if (!localStorage.getItem('pwa_dismissed')) {
+    setTimeout(() => document.getElementById('pwa-banner')?.classList.add('show'), 3000);
+  }
+});
+
+function installPWA() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    _pwaPrompt.userChoice.then(r => {
+      if (r.outcome === 'accepted') showToast('✅ تم تثبيت التطبيق!', 'success');
+      document.getElementById('pwa-banner')?.classList.remove('show');
+      _pwaPrompt = null;
+    });
+  } else {
+    showToast('📱 اضغط مشاركة ← "إضافة للشاشة الرئيسية"', 'info');
+    dismissPWA();
+  }
+}
+
+function dismissPWA() {
+  document.getElementById('pwa-banner')?.classList.remove('show');
+  localStorage.setItem('pwa_dismissed', '1');
+}
+
+window.addEventListener('appinstalled', () => document.getElementById('pwa-banner')?.classList.remove('show'));
 
 function toggleTheme() {
   const isLight = document.body.classList.toggle('light-mode');
