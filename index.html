@@ -1910,115 +1910,6 @@ footer {
 .social-stat-label { font-size: 12px; color: var(--text-muted); font-weight: 700; margin-top: 3px; }
 
 /* ═══════════════════════════════════════
-   COUNTDOWN OFFER BANNER
-═══════════════════════════════════════ */
-#offer-banner {
-  background: linear-gradient(135deg, #1a0a00, #2d1200);
-  border-bottom: 2px solid var(--gold2);
-  padding: 10px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  position: sticky;
-  top: 70px;
-  z-index: 900;
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-.offer-text { font-size: 13px; font-weight: 800; color: var(--text); }
-.offer-text span { color: var(--gold); }
-.offer-timer {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-.offer-seg {
-  background: rgba(255,170,0,0.15);
-  border: 1px solid rgba(255,170,0,0.3);
-  border-radius: 6px;
-  padding: 3px 8px;
-  font-size: 16px;
-  font-weight: 900;
-  font-family: var(--font-en);
-  color: var(--gold);
-  min-width: 32px;
-  text-align: center;
-  line-height: 1.4;
-}
-.offer-seg-label { font-size: 9px; color: var(--text-muted); display: block; font-weight: 700; }
-.offer-sep { color: var(--gold); font-weight: 900; font-size: 16px; }
-.offer-close { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; margin-right: 4px; }
-
-/* ═══════════════════════════════════════
-   PRICE COMPARISON
-═══════════════════════════════════════ */
-.compare-price-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-top: 24px;
-}
-.compare-price-header {
-  padding: 16px 20px;
-  background: rgba(0,212,255,0.05);
-  border-bottom: 1px solid var(--border);
-  font-size: 15px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.compare-price-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
-  transition: var(--transition);
-}
-.compare-price-row:hover { background: rgba(0,212,255,0.03); }
-.compare-price-row:last-child { border-bottom: none; }
-.compare-site { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 700; }
-.compare-site-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.compare-site-price { font-family: var(--font-en); font-weight: 900; font-size: 16px; }
-.compare-badge-best { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.25); padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 800; }
-.compare-badge-high { background: rgba(255,61,87,0.1); color: var(--red); border: 1px solid rgba(255,61,87,0.2); padding: 2px 10px; border-radius: 50px; font-size: 11px; font-weight: 800; }
-
-/* ═══════════════════════════════════════
-   SOCIAL SEARCH & REVIEW
-═══════════════════════════════════════ */
-.social-search-bar {
-  max-width: 400px;
-  margin: 0 auto 28px;
-  position: relative;
-}
-.social-search-bar input {
-  width: 100%;
-  background: var(--bg-card);
-  border: 1.5px solid var(--border);
-  border-radius: 50px;
-  padding: 12px 48px 12px 20px;
-  color: var(--text);
-  font-family: var(--font-ar);
-  font-size: 14px;
-  outline: none;
-  transition: var(--transition);
-}
-.social-search-bar input:focus { border-color: #e1306c; box-shadow: 0 0 0 3px rgba(225,48,108,0.1); }
-.social-search-bar i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-
-.purchase-review-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-  margin-top: 16px;
-}
-.purchase-review-title { font-size: 16px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-
-/* ═══════════════════════════════════════
    RESPONSIVE
 ═══════════════════════════════════════ */
 @media (max-width: 900px) {
@@ -2070,19 +1961,6 @@ footer {
    PAGE: HOME
 ════════════════════════════════════ -->
 <div id="page-home" class="page active">
-
-  <!-- عرض خاص محدود الوقت -->
-  <div id="offer-banner">
-    <div class="offer-text">🔥 عرض خاص: <span>خصم 20%</span> على جميع حسابات eFootball</div>
-    <div class="offer-timer">
-      <div class="offer-seg"><span id="ot-h">00</span><span class="offer-seg-label">ساعة</span></div>
-      <span class="offer-sep">:</span>
-      <div class="offer-seg"><span id="ot-m">00</span><span class="offer-seg-label">دقيقة</span></div>
-      <span class="offer-sep">:</span>
-      <div class="offer-seg"><span id="ot-s">00</span><span class="offer-seg-label">ثانية</span></div>
-    </div>
-    <button class="offer-close" onclick="document.getElementById('offer-banner').style.display='none'">✕</button>
-  </div>
 
   <!-- Hero -->
   <section class="hero" style="padding-top:100px;">
@@ -2291,12 +2169,6 @@ footer {
       <div class="social-stat"><div class="social-stat-num" style="color:var(--accent);">🔒</div><div class="social-stat-label">آمن تماماً</div></div>
     </div>
 
-    <!-- بحث -->
-    <div class="social-search-bar">
-      <input type="text" id="social-search" placeholder="ابحث عن خدمة..." oninput="filterSocialPackages(this.value)">
-      <i class="fas fa-search"></i>
-    </div>
-
     <!-- Service Type Tabs -->
     <div class="service-tabs">
       <div class="service-tab active" id="stab-followers" onclick="switchService('followers')">
@@ -2375,7 +2247,7 @@ footer {
       <span class="footer-link" onclick="navigate('social')">سوشيال</span>
       <span class="footer-link" onclick="navigate('contact')">تواصل</span>
     </div>
-    <p class="footer-copy" class="footer-secret-extra">© 2025 PES Accounts Market · جميع الحقوق محفوظة</p>
+    <p class="footer-copy" id="footer-secret">© 2025 PES Accounts Market · جميع الحقوق محفوظة</p>
   </footer>
 </div>
 
@@ -3012,16 +2884,6 @@ footer {
 
 
 <script>
-// ────────────── SECURITY ──────────────
-function sanitize(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;').replace(/'/g,'&#x27;').replace(/`/g,'&#x60;');
-}
-// بيانات تجريبية مشفرة — لا تظهر كنص صريح في الكود
-const _D = atob('YWRtaW5AcGVzLmNvbTphZG1pbjEyMw==').split(':');
-
 // ────────────── CONFIG ──────────────
 const SITE_CONFIG = {
   whatsapp: '+212600000000',
@@ -3260,16 +3122,14 @@ function renderCard(acc) {
   const statusMap = { available: ['badge-available', '🟢 متوفر'], sold: ['badge-sold', '🔴 تم البيع'], reserved: ['badge-reserved', '🟡 محجوز'] };
   const [sCls, sLabel] = statusMap[acc.status] || statusMap.available;
   const stars = Array.from({length:5}, (_,i) => `<span class="star ${i < acc.stars ? 'active' : ''}">★</span>`).join('');
-  const safeName = sanitize(acc.name);
-  const safeId   = sanitize(acc.id);
   const img = acc.img
-    ? `<img src="${sanitize(acc.img)}" alt="${safeName}" onerror="this.parentElement.innerHTML='<div class=card-thumb-placeholder><span>🎮</span></div>'">`
+    ? `<img src="${acc.img}" alt="${acc.name}" onerror="this.parentElement.innerHTML='<div class=card-thumb-placeholder><span>🎮</span></div>'">`
     : '<div class="card-thumb-placeholder"><span>🎮</span></div>';
   const views = getViews(acc.id);
   const inCompare = compareList.includes(acc.id);
   const newBadge = isNew(acc) ? '<div class="card-new-badge">NEW</div>' : '';
   return `
-  <div class="account-card ${acc.featured ? 'featured' : ''}" onclick="openDetail('${safeId}')">
+  <div class="account-card ${acc.featured ? 'featured' : ''}" onclick="openDetail('${acc.id}')">
     <div class="card-thumb">
       ${img}
       <div class="card-badges"><span class="badge ${sCls}">${sLabel}</span></div>
@@ -3277,12 +3137,12 @@ function renderCard(acc) {
       ${newBadge}
     </div>
     <div class="card-body">
-      <div class="card-name">${safeName}</div>
+      <div class="card-name">${acc.name}</div>
       <div class="card-stats">
-        <div class="card-stat"><i class="fas fa-chart-line card-stat-icon"></i><div class="card-stat-text"><span>المستوى</span><strong>${sanitize(acc.level) || '—'}</strong></div></div>
+        <div class="card-stat"><i class="fas fa-chart-line card-stat-icon"></i><div class="card-stat-text"><span>المستوى</span><strong>${acc.level || '—'}</strong></div></div>
         <div class="card-stat"><i class="fas fa-star card-stat-icon" style="color:var(--gold);"></i><div class="card-stat-text"><span>أسطوري</span><strong>${acc.legends || 0}</strong></div></div>
-        <div class="card-stat"><i class="fas fa-coins card-stat-icon" style="color:var(--gold2);"></i><div class="card-stat-text"><span>الكوينز</span><strong>${sanitize(acc.coins) || '—'}</strong></div></div>
-        <div class="card-stat"><i class="fas fa-trophy card-stat-icon" style="color:var(--purple);"></i><div class="card-stat-text"><span>GP</span><strong>${sanitize(acc.gp) || '—'}</strong></div></div>
+        <div class="card-stat"><i class="fas fa-coins card-stat-icon" style="color:var(--gold2);"></i><div class="card-stat-text"><span>الكوينز</span><strong>${acc.coins || '—'}</strong></div></div>
+        <div class="card-stat"><i class="fas fa-trophy card-stat-icon" style="color:var(--purple);"></i><div class="card-stat-text"><span>GP</span><strong>${acc.gp || '—'}</strong></div></div>
       </div>
       <div class="card-stars">${stars}</div>
       <div class="card-footer">
@@ -3292,10 +3152,10 @@ function renderCard(acc) {
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
           <div class="card-views"><i class="fas fa-eye"></i> ${views}</div>
-          <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();openDetail('${safeId}')">التفاصيل</button>
+          <button class="btn btn-gold btn-sm" onclick="event.stopPropagation();openDetail('${acc.id}')">التفاصيل</button>
         </div>
       </div>
-      <button class="btn btn-sm ${inCompare ? 'btn-primary' : 'btn-outline'}" style="margin-top:8px;width:100%;" onclick="event.stopPropagation();toggleCompare('${safeId}')">
+      <button class="btn btn-sm ${inCompare ? 'btn-primary' : 'btn-outline'}" style="margin-top:8px;width:100%;" onclick="event.stopPropagation();toggleCompare('${acc.id}')">
         <i class="fas fa-exchange-alt"></i> ${inCompare ? 'إلغاء المقارنة' : 'أضف للمقارنة'}
       </button>
     </div>
@@ -3340,10 +3200,8 @@ function renderDetail(acc) {
   const statusMap = { available: ['badge-available', '🟢 متوفر'], sold: ['badge-sold', '🔴 تم البيع'], reserved: ['badge-reserved', '🟡 محجوز'] };
   const [sCls, sLabel] = statusMap[acc.status] || statusMap.available;
   const stars = Array.from({length:5}, (_,i) => `<span class="star ${i < acc.stars ? 'active' : ''}">★</span>`).join('');
-  const players = (acc.players || []).map(p => `<div class="player-tag">⚡ ${sanitize(p)}</div>`).join('');
+  const players = (acc.players || []).map(p => `<div class="player-tag">⚡ ${p}</div>`).join('');
   const allImgs = [acc.img, ...(acc.images || [])].filter(Boolean);
-  const safeAccName = sanitize(acc.name);
-  const safeAccId = sanitize(acc.id);
   const mainImgHtml = allImgs.length
     ? `<img src="${allImgs[0]}" id="main-img" style="width:100%;height:320px;object-fit:cover;" onerror="this.src=''" alt="">`
     : `<div class="detail-main-img" style="display:flex;align-items:center;justify-content:center;font-size:70px;height:320px;">🎮</div>`;
@@ -3352,7 +3210,7 @@ function renderDetail(acc) {
     : '';
 
   document.getElementById('detail-content').innerHTML = `
-  <h1 class="detail-title">${safeAccName}</h1>
+  <h1 class="detail-title">${acc.name}</h1>
   <div class="detail-badges">
     <span class="badge ${sCls}">${sLabel}</span>
     ${acc.featured ? '<span class="badge" style="background:rgba(255,215,0,0.15);color:var(--gold);border:1px solid rgba(255,215,0,0.3);">⭐ مميز</span>' : ''}
@@ -3396,7 +3254,6 @@ function renderDetail(acc) {
         <div class="price-info">
           ${acc.negotiable ? `<div class="price-negotiable"><i class="fas fa-handshake"></i> السعر قابل للتفاوض حتى ${acc.maxPrice || acc.price} درهم</div>` : 'السعر ثابت غير قابل للتفاوض'}
         </div>
-        ${renderPriceComparison(acc.price)}
         ${acc.status === 'available' ? `
           <div style="margin-bottom:16px;">
             <div class="sidebar-card-title" style="margin-bottom:10px;">🕐 حجز مؤقت</div>
@@ -3407,7 +3264,7 @@ function renderDetail(acc) {
               </div>
             </div>
           </div>
-          <button class="btn btn-whatsapp btn-block btn-lg" onclick="contactWhatsApp('${sanitize(acc.name)}','${acc.price}')">
+          <button class="btn btn-whatsapp btn-block btn-lg" onclick="contactWhatsApp('${acc.name}','${acc.price}')">
             <i class="fab fa-whatsapp"></i> تواصل عبر واتساب
           </button>
           <div style="margin-top:10px;display:flex;gap:8px;">
@@ -3546,11 +3403,11 @@ async function adminLogin() {
       await signInWithEmailAndPassword(auth, email, pass);
       isAdminLoggedIn = true;
     } else {
-      // Demo login — بيانات مخفية
-      if (email === _D[0] && pass === _D[1]) {
+      // Demo login
+      if (email === 'admin@pes.com' && pass === 'admin123') {
         isAdminLoggedIn = true;
       } else {
-        errEl.textContent = 'بيانات الدخول غير صحيحة';
+        errEl.textContent = 'Firebase غير متصل — تجريبي: admin@pes.com / admin123';
         errEl.classList.add('show');
         return;
       }
@@ -3674,11 +3531,11 @@ async function loadMessages() {
   list.innerHTML = msgs.map(m => `
     <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
-        <strong>${sanitize(m.name)}</strong>
-        <span style="font-size:12px;color:var(--text-muted);">${sanitize(m.subject)}</span>
+        <strong>${m.name}</strong>
+        <span style="font-size:12px;color:var(--text-muted);">${m.subject}</span>
       </div>
-      <div style="font-size:14px;color:var(--text-muted);margin-bottom:6px;">${sanitize(m.body)}</div>
-      ${m.phone ? `<div style="font-size:12px;color:var(--accent);"><i class="fas fa-phone"></i> ${sanitize(m.phone)}</div>` : ''}
+      <div style="font-size:14px;color:var(--text-muted);margin-bottom:6px;">${m.body}</div>
+      ${m.phone ? `<div style="font-size:12px;color:var(--accent);"><i class="fas fa-phone"></i> ${m.phone}</div>` : ''}
     </div>`).join('');
 }
 
@@ -3873,11 +3730,7 @@ window.switchService      = switchService;
 window.openSocialOrder    = openSocialOrder;
 window.closeSocialOrder   = closeSocialOrder;
 window.confirmSocialOrder = confirmSocialOrder;
-window.filterSocialPackages = filterSocialPackages;
-window.openPurchaseReview   = openPurchaseReview;
-window.prPickStar           = prPickStar;
-window.submitPurchaseReview = submitPurchaseReview;
-window.installPWA           = installPWA;
+window.installPWA         = installPWA;
 window.dismissPWA         = dismissPWA;
 window.toggleTheme        = toggleTheme;
 window.openCustomRequest   = openCustomRequest;
@@ -3909,17 +3762,8 @@ window.sendCustomRequest   = sendCustomRequest;
   // تحميل الصفحة الرئيسية مباشرة
   navigate('home');
 
-  // تطبيق الثيم التلقائي حسب الوقت
-  autoThemeByTime();
-
-  // تطبيق الثيم المحفوظ (يتغلب على التلقائي)
+  // تطبيق الثيم المحفوظ
   loadTheme();
-
-  // تشغيل العداد التنازلي
-  startOfferCountdown();
-
-  // تفعيل أصوات الأزرار
-  setTimeout(initButtonSounds, 500);
 
   // تحميل الإعدادات المحفوظة فوراً
   loadContactInfo();
@@ -4043,224 +3887,9 @@ function confirmSocialOrder() {
   window.open(`https://wa.me/${SITE_CONFIG.whatsapp.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank');
   closeSocialOrder();
   showToast('✅ جاري فتح واتساب...', 'success');
-  // بعد 3 ثوانٍ اقترح التقييم
-  setTimeout(() => openPurchaseReview(serviceNames[type], Date.now().toString()), 3000);
 }
 
-// ────────────── OFFER COUNTDOWN ──────────────
-function startOfferCountdown() {
-  // ينتهي العرض في منتصف الليل
-  function tick() {
-    const now = new Date();
-    const end = new Date();
-    end.setHours(23, 59, 59, 0);
-    let diff = Math.max(0, Math.floor((end - now) / 1000));
-    const h = Math.floor(diff / 3600);
-    const m = Math.floor((diff % 3600) / 60);
-    const s = diff % 60;
-    const pad = n => String(n).padStart(2,'0');
-    const oh = document.getElementById('ot-h');
-    const om = document.getElementById('ot-m');
-    const os = document.getElementById('ot-s');
-    if (oh) oh.textContent = pad(h);
-    if (om) om.textContent = pad(m);
-    if (os) os.textContent = pad(s);
-    if (diff === 0) document.getElementById('offer-banner')?.style.setProperty('display','none');
-  }
-  tick();
-  setInterval(tick, 1000);
-}
-
-// ────────────── SOUND ON BUTTONS ──────────────
-function initButtonSounds() {
-  // نستخدم Web Audio API — بدون ملفات خارجية
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
-  function playClick() {
-    if (!ctx) return;
-    try {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = 800;
-      o.type = 'sine';
-      g.gain.setValueAtTime(0.08, ctx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
-      o.start(); o.stop(ctx.currentTime + 0.08);
-    } catch(e) {}
-  }
-
-  function playSuccess() {
-    if (!ctx) return;
-    try {
-      [600, 800, 1000].forEach((freq, i) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.connect(g); g.connect(ctx.destination);
-        o.frequency.value = freq;
-        o.type = 'sine';
-        const t = ctx.currentTime + i * 0.08;
-        g.gain.setValueAtTime(0.06, t);
-        g.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
-        o.start(t); o.stop(t + 0.1);
-      });
-    } catch(e) {}
-  }
-
-  // أضف صوت لكل الأزرار
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('button, .btn, .bnav-item, .nav-link');
-    if (btn) {
-      if (btn.classList.contains('btn-primary') || btn.classList.contains('btn-gold') || btn.classList.contains('btn-whatsapp')) {
-        playSuccess();
-      } else {
-        playClick();
-      }
-    }
-  }, { passive: true });
-}
-
-// ────────────── AUTO DARK/LIGHT MODE ──────────────
-function autoThemeByTime() {
-  // لا تطبّق إذا المستخدم اختار يدوياً
-  if (localStorage.getItem('theme')) return;
-  const hour = new Date().getHours();
-  // نهار: 7 صباحاً - 7 مساءً
-  const isDay = hour >= 7 && hour < 19;
-  if (isDay) {
-    document.body.classList.add('light-mode');
-    const btn = document.getElementById('theme-toggle');
-    if (btn) btn.innerHTML = '<i class="fas fa-moon"></i>';
-  }
-}
-
-// ────────────── PRICE COMPARISON ──────────────
-const priceComparisons = {
-  default: [
-    { site: 'PES Market (نحن)', price: null, color: 'var(--green)', best: true },
-    { site: 'ZeusX', price: null, multiplier: 2.8, color: '#8b5cf6' },
-    { site: 'PlayerAuctions', price: null, multiplier: 3.2, color: '#3b82f6' },
-    { site: 'G2G', price: null, multiplier: 2.5, color: '#f59e0b' },
-  ]
-};
-
-function renderPriceComparison(ourPrice) {
-  if (!ourPrice) return '';
-  const rows = priceComparisons.default.map(s => {
-    const price = s.best ? ourPrice : Math.round(ourPrice * s.multiplier);
-    const badge = s.best
-      ? '<span class="compare-badge-best">✅ الأرخص</span>'
-      : price > ourPrice * 2 ? '<span class="compare-badge-high">أغلى بكثير</span>' : '';
-    return `
-    <div class="compare-price-row">
-      <div class="compare-site">
-        <div class="compare-site-dot" style="background:${s.color};"></div>
-        <span>${s.site}</span>
-        ${badge}
-      </div>
-      <div class="compare-site-price" style="color:${s.best ? 'var(--green)' : 'var(--text-muted)'};">${price} درهم</div>
-    </div>`;
-  }).join('');
-  return `
-  <div class="compare-price-card">
-    <div class="compare-price-header"><i class="fas fa-chart-bar" style="color:var(--accent);"></i> مقارنة الأسعار مع مواقع أخرى</div>
-    ${rows}
-  </div>`;
-}
-
-// ────────────── SOCIAL SEARCH FILTER ──────────────
-function filterSocialPackages(q) {
-  const query = q.toLowerCase().trim();
-  if (!query) { renderSocialPackages(currentService); return; }
-  const all = Object.entries(socialPackages).flatMap(([type, pkgs]) =>
-    pkgs.map(p => ({ ...p, type }))
-  ).filter(p =>
-    p.unit.includes(query) ||
-    p.amount.toString().includes(query) ||
-    p.price.toString().includes(query) ||
-    serviceNames[p.type]?.includes(query)
-  );
-
-  const grid = document.getElementById('social-packages');
-  if (!all.length) {
-    grid.innerHTML = '<div class="empty-state" style="padding:40px;"><div class="icon">🔍</div><h3>لا نتائج</h3></div>';
-    return;
-  }
-  grid.innerHTML = `<div class="packages-grid">${all.map(p => {
-    const icon = serviceIcons[p.type];
-    return `
-    <div class="pkg-card ${p.popular?'popular':''}" onclick="openSocialOrder('${p.type}','${p.id}')">
-      ${p.popular ? '<div class="pkg-popular-badge">⭐ الأكثر مبيعاً</div>' : ''}
-      <div class="pkg-icon" style="margin-top:${p.popular?'24px':'0'}">${icon}</div>
-      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">${serviceNames[p.type]}</div>
-      <div class="pkg-amount ig">${p.amount.toLocaleString()}</div>
-      <div class="pkg-unit">${p.unit}</div>
-      <div class="pkg-price">${p.price} <span>درهم</span></div>
-      <button class="btn btn-lg btn-block" style="background:linear-gradient(135deg,#833ab4,#fd1d1d,#f77737);color:#fff;">
-        <i class="fab fa-whatsapp"></i> اطلب الآن
-      </button>
-    </div>`;
-  }).join('')}</div>`;
-}
-
-// ────────────── PURCHASE REVIEW (after buying) ──────────────
-let purchaseReviewData = { orderId: '', stars: 0 };
-
-function openPurchaseReview(serviceName, orderId) {
-  purchaseReviewData = { orderId, stars: 0, service: serviceName };
-  const modal = document.createElement('div');
-  modal.className = 'modal-overlay open';
-  modal.id = 'purchase-review-overlay';
-  modal.innerHTML = `
-  <div class="modal-box" style="max-width:420px;">
-    <div class="modal-header">
-      <h3>⭐ قيّم تجربتك</h3>
-      <button class="modal-close" onclick="document.getElementById('purchase-review-overlay').remove()"><i class="fas fa-times"></i></button>
-    </div>
-    <div class="modal-body">
-      <div style="text-align:center;margin-bottom:20px;">
-        <div style="font-size:40px;margin-bottom:8px;">🎉</div>
-        <div style="font-weight:800;font-size:16px;margin-bottom:4px;">شكراً على ثقتك بنا!</div>
-        <div style="font-size:13px;color:var(--text-muted);">كيف كانت تجربتك مع ${serviceName}؟</div>
-      </div>
-      <div class="star-picker" id="pr-stars" style="justify-content:center;font-size:40px;">
-        <span class="star-pick" data-v="1" onclick="prPickStar(1)">★</span>
-        <span class="star-pick" data-v="2" onclick="prPickStar(2)">★</span>
-        <span class="star-pick" data-v="3" onclick="prPickStar(3)">★</span>
-        <span class="star-pick" data-v="4" onclick="prPickStar(4)">★</span>
-        <span class="star-pick" data-v="5" onclick="prPickStar(5)">★</span>
-      </div>
-      <div class="form-group" style="margin-top:16px;">
-        <label class="form-label">تعليق (اختياري)</label>
-        <textarea class="form-textarea" id="pr-comment" placeholder="شاركنا رأيك..." style="min-height:80px;"></textarea>
-      </div>
-      <button class="btn btn-gold btn-block btn-lg" onclick="submitPurchaseReview()">
-        <i class="fas fa-paper-plane"></i> إرسال التقييم
-      </button>
-    </div>
-  </div>`;
-  document.body.appendChild(modal);
-}
-
-function prPickStar(n) {
-  purchaseReviewData.stars = n;
-  document.querySelectorAll('#pr-stars .star-pick').forEach((s,i) => s.classList.toggle('active', i < n));
-}
-
-function submitPurchaseReview() {
-  if (!purchaseReviewData.stars) { showToast('الرجاء اختيار التقييم', 'error'); return; }
-  const comment = document.getElementById('pr-comment')?.value.trim() || '';
-  userReviews.unshift({
-    name: 'زبون',
-    stars: purchaseReviewData.stars,
-    text: comment || `تجربة رائعة مع ${purchaseReviewData.service}!`,
-    date: 'الآن',
-    verified: true
-  });
-  document.getElementById('purchase-review-overlay')?.remove();
-  showToast('✅ شكراً على تقييمك!', 'success');
-}
-
+// ────────────── PWA INSTALL ──────────────
 let _pwaPrompt = null;
 
 window.addEventListener('beforeinstallprompt', (e) => {
@@ -4897,10 +4526,9 @@ if (urlAcc) setTimeout(() => openDetail(urlAcc), 600);
 // للوصول للإدارة يجب:
 // الخطوة 1: اضغط شعار "P" في النافبار 5 مرات متتالية
 // الخطوة 2: اضغط على © في الفوتر مرة واحدة خلال 30 ثانية
-// الوصول بالرابط السري
+// أو: رابط سري yoursite.com?admin=pes2025
 
-// الكلمة السرية مشفرة — لا تظهر كنص صريح
-const ADMIN_SECRET_KEY = atob('cGVzMjAyNQ==');
+const ADMIN_SECRET_KEY = 'pes2025'; // ← غيّر هذا
 
 let _tapCount = 0, _tapTimer = null;
 let _step1Done = false, _step1Timer = null; // بعد 5 ضغطات على الشعار
